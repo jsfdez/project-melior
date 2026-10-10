@@ -1,14 +1,15 @@
 # Melior: árbol de opciones
 
-Diseño del árbol de preguntas y respuestas de Melior, la app de comunicación asistida que se controla solo con movimientos de cabeza. El usuario recorre el árbol seleccionando opciones (dwell) y la frase elegida se pronuncia con ElevenLabs.
+Diseño del árbol de preguntas y respuestas de Melior, la app de comunicación asistida que se controla solo con movimientos de cabeza. El usuario recorre el árbol seleccionando opciones con la dirección de la cabeza y la frase elegida se pronuncia con ElevenLabs.
 
 Este documento define solo la parte **estática** del árbol. A partir de ciertos nodos, Gemma genera las opciones según la hora y la conversación reciente.
 
 ## Principios de diseño
 
-- **Máximo 4 opciones por pantalla.** Se muestran en una cuadrícula 2×2 con botones grandes, más fáciles de acertar con la cabeza.
+- **Máximo 4 opciones por pantalla, una por dirección de la cabeza:** arriba, abajo, izquierda y derecha. Se elige inclinando o girando la cabeza hacia esa dirección y manteniéndola ~0,8 s (ajustable por usuario); volver al centro reinicia el tiempo. No hay cursor ni puntería, así que tolera temblor y poco rango de movimiento.
+- **Orden de las opciones:** en cada nodo del árbol, las 4 opciones se leen en el orden ↑ arriba, ↓ abajo, ← izquierda, → derecha. La posición es fija en cada nivel para crear memoria muscular.
 - **Nivel 1 fijo:** Responder, Necesito, Urgencia y Más.
-- **Navegación por gestos, no por botones.** Sacudir la cabeza es Atrás. Asentir confirma. Atrás y Confirmar no ocupan ninguna de las 4 opciones.
+- **Atrás y Confirmar no ocupan ninguna de las 4 opciones.** Como las 4 direcciones ya eligen opciones, sacudir y asentir ya no sirven (se confundirían con elegir). Gesto provisional: Atrás = mantener el centro ~2 s. Confirmar = repetir la misma dirección o mantenerla más tiempo (~1,5 s). Ver decisiones abiertas.
 - **Frases rápidas.** Lo más frecuente se dice en 2 o 3 selecciones. Solo Dolor y Comodidad llegan a 4 niveles, porque necesitan precisión.
 - **Frases neutras en género.** Se evita "cansado/a" (se usa "Tengo sueño", "Me siento triste") para no depender de una configuración.
 - **Las acciones críticas piden confirmación** (asentir) antes de hablar, para evitar falsos positivos.
@@ -192,4 +193,6 @@ Las frases marcadas `[!]` piden confirmación antes de hablar. Las siguientes de
 4. **Frases de emergencia:** validar el texto exacto y qué voz local se usa como respaldo.
 5. **Validación con un usuario real o terapeuta**, sobre todo el vocabulario de Necesito y Me siento.
 6. **Idiomas:** español primero. Las etiquetas y frases deberán poder traducirse al añadir el inglés.
-7. **Ajustes:** definir si las acciones del sistema van aquí o en una vía separada para el cuidador.
+7. **Gestos de Atrás y Confirmar:** definir el gesto definitivo (mantener el centro, parpadeo largo, boca abierta) y probarlo con un usuario real.
+8. **Asignación de direcciones en el nivel 1:** con el orden ↑ ↓ ← →, la raíz queda Responder ↑, Necesito ↓, Urgencia ←, Más →. Valorar si Urgencia debe ir en otra posición.
+9. **Ajustes:** definir si las acciones del sistema van aquí o en una vía separada para el cuidador.
