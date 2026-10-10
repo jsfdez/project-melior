@@ -12,8 +12,8 @@ Webcam -> head tracking (MediaPipe Face Landmarker) -> gestures (move, dwell, no
                                                           |
                           Gemma suggests 4-6 phrases / needs (JSON)
                                                           |
-                             user selects with the head   v
-                                    ElevenLabs speaks it through the speakers
+                                    user selects with the head   v
+                                            ElevenLabs speaks it through the speakers
 ```
 
 ## Getting Started
@@ -53,7 +53,6 @@ chmod +x run.sh
 **Default Behavior:**
 If no script is provided, it defaults to running `main.py`.
 
-**Example:**
 ```bash
 ./run.sh
 ```
@@ -78,7 +77,7 @@ This project is designed to run as a **self-contained sandbox**.
 
 ## Use Claude Code
 
-```
+```bash
 export ANTHROPIC_BASE_URL=https://bubbly-vermilion.netbird.apps.buildinmadrid.dev
 export ANTHROPIC_API_KEY=none
 claude --model=gemma-4-26b-a4b
@@ -165,7 +164,7 @@ Known to verify with real users: angle thresholds and the long-blink duration.
 
 ## To make LLM requests
 
-```
+```bash
 curl https://bubbly-vermilion.netbird.apps.buildinmadrid.dev/v1/chat/completions \
   -H "Content-Type: application/json" \
   -d '{
@@ -195,16 +194,16 @@ Keep these out of the code (environment variables):
 - Send the LLM and ElevenLabs only the minimum text needed. No personal or health data while the LLM endpoint is shared.
 - Critical actions (emergency, alert) need a confirmation to avoid false positives.
 
-## Open decisions (to complete)
+## Open decisions
 
-- [ ] **UI in Python:** desktop window (OpenCV / pygame / Tkinter) or a local web UI served by Python (FastAPI / NiceGUI)?
-- [ ] **Web version:** not necessary at first
-- [ ] **MVP level:** needs board reordered by Gemma (microphone is out of the MVP).
+- [x] **UI in Python:** Decided on Pygame for a desktop-based interface.
+- [x] **Web version:** Not a priority for the initial MVP.
+- [x] **MVP level:** Microphone support is out of scope for the current MVP.
+- [x] **Repo structure and how to run:** Documented in the Overview section.
 - [ ] **First real user / therapist** to validate the interaction.
 - [ ] **Languages:** Spanish first, English later?
 - [ ] **Emergency fallback:** which phrases and which local voice?
 - [ ] **Voice:** generic ElevenLabs voice or a cloned one (needs consent)?
-- [ ] **Repo structure and how to run** (to fill in once the first prototype exists).
 
 ## Team Roles & Implementation
 
@@ -236,3 +235,28 @@ To enable parallel development, the project is divided into four functional laye
 2. Add Gemma suggestions through the endpoint above.
 3. Future option: microphone input (speech-to-text) and replies to what the other person says.
 4. Calibration, fallback mode and tests with a real user.
+
+## Technical Component Overview
+
+This section describes the core software components and their responsibilities.
+
+### Vision & Signal Processing
+
+*   **`HeadTracker` (`src/vision/head_tracker.py`)**: Uses MediaPipe Face Landmarker to capture webcam frames. It computes the facial transformation matrix to derive head pose (pitch, yaw, roll) and calculates a blink score from eye blendshapes.
+*   **`VisionWorker` (`src/core/vision_worker.py`)**: A background `threading.Thread` that manages the `HeadTracker` lifecycle. It continuously reads from the camera and pushes `VisionFrame` objects (containing pose, blink, and the image) into a thread-safe `queue.Queue`.
+
+### Interaction & Gestures
+
+*   **`GestureEngine` (`src/interaction/gesture_engine.py`)**: Consumes `VisionFrame` data to detect semantic gestures. It uses Exponential Moving Average (EMA) smoothing for head pose and implements a state machine to trigger `move` (based on angle thresholds) and `back` (based on long-blink duration) events. It manages a "neutral pose" learned during an initial calibration period.
+
+### User Interface
+
+*   **`DesktopApp` (`src/interface/desktop_interface.py`)**: A Pygame-based graphical interface. It runs a main loop that:
+    1.  Consumes the latest `VisionFrame` from the input queue (discarding older ones to minimize latency).
+    2.  Updates the UI with the camera feed.
+    3.  Processes detected `GestureEvent`s via the `GestureEngine`.
+    4.  Displays status information and a log of recent events.
+
+### Orchestration
+
+*   **`main.py`**: The entry point of the application. It orchestrates the lifecycle of the `VisionWorker` thread and the `DesktopApp` main loop, ensuring a graceful shutdown of all components.
