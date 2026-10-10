@@ -40,7 +40,7 @@ echo "🚀 Running: $SCRIPT_PATH" | tee -a "$LOG_FILE"
 echo "📝 Logging to: $LOG_FILE" | tee -a "$LOG_FILE"
 
 # Execute the script, redirecting stdout and stderr to tee, which writes to the log file
-./venv/bin/python "$SCRIPT_PATH" "$@" 2>&1 | tee -a "$LOG_FILE"
+QT_QPA_PLATFORM=xcb ./venv/bin/python "$SCRIPT_PATH" "$@" 2>&1 | tee -a "$LOG_FILE"
 
 # Capture the exit status of the python script (not the tee command)
 EXIT_CODE=${PIPESTATUS[0]}
