@@ -64,6 +64,9 @@ If no script is provided, it defaults to running `main.py`.
 ```
 *(Runs the specific script)*
 
+**📝 Debugging & Logs:**
+All execution output (stdout and stderr) is automatically captured and saved to the `logs/` directory. If a command fails, check the latest `.log` file in that folder to diagnose the issue.
+
 ## 🛡️ Sandboxing & Isolation
 
 This project is designed to run as a **self-contained sandbox**. 
