@@ -9,11 +9,17 @@ export ANTHROPIC_API_KEY=none
 claude --model=gemma-4-26b-a4b
 ```
 
-## Program constraints
+## Application constraints
 
 - Use Python
 - Use Gemma-4-26b-a4b
 - Use elevenlabs.io if possible
+
+## Application features
+
+- Use webcam
+- Use microphone
+- Use speakers
 
 ## To make LLM requests
 
