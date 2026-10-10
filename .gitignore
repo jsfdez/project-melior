@@ -20,3 +20,10 @@ logs/
 # IDEs
 .vscode/
 .idea/
+
+# Historial local del usuario (no se sube)
+data/user_history.jsonl
+data/tts_cache/
+
+# macOS
+.DS_Store

@@ -1,0 +1,592 @@
+{
+  "label": "Melior",
+  "children": [
+    {
+      "label": "Responder",
+      "children": [
+        {
+          "label": "Sí",
+          "children": [
+            {
+              "label": "Sí"
+            },
+            {
+              "label": "Sí, gracias"
+            },
+            {
+              "label": "Sí, por favor"
+            },
+            {
+              "label": "Sí, y…",
+              "flags": [
+                "ia"
+              ],
+              "ia_prompt": "Continuaciones breves de una respuesta afirmativa a lo último que se le dijo. Deben tener sentido como respuesta a esa frase concreta. No inventes peticiones nuevas que no tengan relación. Cada opción es la frase completa que se dirá y empieza siempre por 'Sí, '.",
+              "fallback": [
+                "Sí, ahora mismo",
+                "Sí, un poco después",
+                "Sí, si puedes",
+                "Sí, como siempre",
+                "Sí, gracias",
+                "Sí, por favor",
+                "Sí, claro",
+                "Sí, me viene bien"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "No",
+          "children": [
+            {
+              "label": "No"
+            },
+            {
+              "label": "No, gracias"
+            },
+            {
+              "label": "Ahora no"
+            },
+            {
+              "label": "No, porque…",
+              "flags": [
+                "ia"
+              ],
+              "ia_prompt": "Motivos breves y habituales para rechazar lo último que se le dijo. Deben encajar con esa frase concreta. Cada opción es la frase completa que se dirá y empieza siempre por 'No, ' (por ejemplo 'No, tengo sueño').",
+              "fallback": [
+                "No, ahora no",
+                "No, no me apetece",
+                "No, tengo sueño",
+                "No, estoy incómodo",
+                "No, me duele",
+                "No, prefiero descansar",
+                "No, hay mucho ruido",
+                "No, tengo frío"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "Ni sí ni no",
+          "children": [
+            {
+              "label": "No sé"
+            },
+            {
+              "label": "Quizás"
+            },
+            {
+              "label": "Más tarde"
+            },
+            {
+              "label": "Dame un momento"
+            }
+          ]
+        },
+        {
+          "label": "Otra respuesta",
+          "flags": [
+            "ia"
+          ],
+          "ia_prompt": "Cuatro respuestas posibles a lo último que se le dijo, que no sean un simple sí o no.",
+          "fallback": [
+            "Más tarde",
+            "Dame un momento",
+            "No te entiendo",
+            "Repite, por favor",
+            "Déjame pensarlo",
+            "Luego te digo",
+            "Háblame más despacio",
+            "Ahora no puedo"
+          ]
+        }
+      ]
+    },
+    {
+      "label": "Necesito",
+      "children": [
+        {
+          "label": "Beber / comer",
+          "children": [
+            {
+              "label": "Agua"
+            },
+            {
+              "label": "Café o té"
+            },
+            {
+              "label": "Tengo hambre",
+              "flags": [
+                "ia"
+              ],
+              "note": "Gemma adapta la comida a la hora",
+              "ia_prompt": "Cuatro comidas o tentempiés concretos y propios de la comida que toca (desayuno, comida, merienda o cena). Redáctalos como petición, por ejemplo 'Quiero una tostada'. No repitas 'Tengo hambre'.",
+              "fallback": [
+                "Quiero algo ligero",
+                "Quiero fruta",
+                "Quiero algo caliente",
+                "Quiero algo dulce",
+                "Quiero un yogur",
+                "Quiero pan",
+                "Quiero una sopa",
+                "Quiero galletas"
+              ]
+            },
+            {
+              "label": "Otra cosa",
+              "flags": [
+                "ia"
+              ],
+              "ia_prompt": "Cuatro peticiones habituales de comida o bebida para el momento del día, distintas de agua, café o té.",
+              "fallback": [
+                "Quiero zumo",
+                "Quiero leche",
+                "Quiero fruta",
+                "Quiero galletas",
+                "Quiero un yogur",
+                "Quiero agua con gas",
+                "Quiero chocolate caliente",
+                "Quiero algo frío"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "Baño / aseo",
+          "children": [
+            {
+              "label": "Baño ya"
+            },
+            {
+              "label": "Baño en un rato"
+            },
+            {
+              "label": "Lavarme"
+            },
+            {
+              "label": "Cambiarme de ropa"
+            }
+          ]
+        },
+        {
+          "label": "Comodidad",
+          "children": [
+            {
+              "label": "Postura",
+              "children": [
+                {
+                  "label": "Incorporarme"
+                },
+                {
+                  "label": "Tumbarme"
+                },
+                {
+                  "label": "Girarme"
+                },
+                {
+                  "label": "Ajustar almohada"
+                }
+              ]
+            },
+            {
+              "label": "Temperatura",
+              "children": [
+                {
+                  "label": "Tengo frío"
+                },
+                {
+                  "label": "Tengo calor"
+                },
+                {
+                  "label": "Abrir ventana"
+                },
+                {
+                  "label": "Cerrar ventana"
+                }
+              ]
+            },
+            {
+              "label": "Luz y ruido",
+              "children": [
+                {
+                  "label": "Más luz"
+                },
+                {
+                  "label": "Menos luz"
+                },
+                {
+                  "label": "Menos ruido"
+                },
+                {
+                  "label": "Cerrar la puerta"
+                }
+              ]
+            },
+            {
+              "label": "Algo me molesta"
+            }
+          ]
+        },
+        {
+          "label": "Mis cosas",
+          "children": [
+            {
+              "label": "Gafas"
+            },
+            {
+              "label": "Móvil o tablet"
+            },
+            {
+              "label": "Medicación"
+            },
+            {
+              "label": "Otra cosa",
+              "flags": [
+                "ia"
+              ],
+              "ia_prompt": "Cuatro objetos personales cotidianos que alguien en cama o en un sillón puede necesitar, distintos de gafas, móvil, tablet y medicación. Redáctalos como petición.",
+              "fallback": [
+                "Mi cargador",
+                "Un pañuelo",
+                "Una manta",
+                "Mi libro",
+                "Mis auriculares",
+                "El mando",
+                "Mi cojín",
+                "Mi libreta"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "label": "Urgencia",
+      "children": [
+        {
+          "label": "No puedo respirar",
+          "flags": [
+            "!"
+          ]
+        },
+        {
+          "label": "Me duele",
+          "children": [
+            {
+              "label": "Cabeza",
+              "children": [
+                {
+                  "label": "Poco"
+                },
+                {
+                  "label": "Bastante"
+                },
+                {
+                  "label": "Muchísimo"
+                }
+              ]
+            },
+            {
+              "label": "Pecho / barriga",
+              "children": [
+                {
+                  "label": "Poco"
+                },
+                {
+                  "label": "Bastante"
+                },
+                {
+                  "label": "Muchísimo",
+                  "flags": [
+                    "!"
+                  ]
+                }
+              ]
+            },
+            {
+              "label": "Espalda / cuello",
+              "children": [
+                {
+                  "label": "Poco"
+                },
+                {
+                  "label": "Bastante"
+                },
+                {
+                  "label": "Muchísimo"
+                }
+              ]
+            },
+            {
+              "label": "Brazos / piernas",
+              "children": [
+                {
+                  "label": "Poco"
+                },
+                {
+                  "label": "Bastante"
+                },
+                {
+                  "label": "Muchísimo"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "label": "Me encuentro mal",
+          "children": [
+            {
+              "label": "Mareo"
+            },
+            {
+              "label": "Náuseas"
+            },
+            {
+              "label": "Fiebre o escalofríos"
+            },
+            {
+              "label": "Muy débil"
+            }
+          ]
+        },
+        {
+          "label": "Pedir ayuda",
+          "children": [
+            {
+              "label": "Llama a alguien"
+            },
+            {
+              "label": "Ven, por favor"
+            },
+            {
+              "label": "Llama a emergencias",
+              "flags": [
+                "!"
+              ]
+            },
+            {
+              "label": "Alarma",
+              "flags": [
+                "!"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "label": "Más",
+      "children": [
+        {
+          "label": "Me siento",
+          "children": [
+            {
+              "label": "Bien"
+            },
+            {
+              "label": "Triste"
+            },
+            {
+              "label": "Nervioso o con miedo"
+            },
+            {
+              "label": "Enfadado o frustrado"
+            }
+          ]
+        },
+        {
+          "label": "Quiero",
+          "children": [
+            {
+              "label": "Compañía",
+              "children": [
+                {
+                  "label": "Quédate conmigo"
+                },
+                {
+                  "label": "Quiero estar solo"
+                },
+                {
+                  "label": "Llamar a mi familia"
+                },
+                {
+                  "label": "Que vengan a verme"
+                }
+              ]
+            },
+            {
+              "label": "Tele",
+              "children": [
+                {
+                  "label": "Encender"
+                },
+                {
+                  "label": "Apagar"
+                },
+                {
+                  "label": "Subir volumen"
+                },
+                {
+                  "label": "Bajar volumen"
+                }
+              ]
+            },
+            {
+              "label": "Música",
+              "children": [
+                {
+                  "label": "Tranquila"
+                },
+                {
+                  "label": "Animada"
+                },
+                {
+                  "label": "Parar"
+                },
+                {
+                  "label": "Elegir canción",
+                  "flags": [
+                    "ia"
+                  ],
+                  "ia_prompt": "Cuatro estilos o géneros musicales apropiados para el momento del día.",
+                  "fallback": [
+                    "Música clásica",
+                    "Música relajante",
+                    "Pop español",
+                    "Música de siempre",
+                    "Jazz suave",
+                    "Boleros",
+                    "Sonidos de la naturaleza",
+                    "Música de los años ochenta"
+                  ]
+                }
+              ]
+            },
+            {
+              "label": "Descansar / salir",
+              "children": [
+                {
+                  "label": "Siesta o dormir",
+                  "note": "según la hora"
+                },
+                {
+                  "label": "Apagar la luz"
+                },
+                {
+                  "label": "Tomar el aire"
+                },
+                {
+                  "label": "Cambiar de habitación"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "label": "Hablar",
+          "children": [
+            {
+              "label": "Saludos",
+              "children": [
+                {
+                  "label": "Saludo según la hora",
+                  "note": "buenos días, tardes o noches"
+                },
+                {
+                  "label": "Hola"
+                },
+                {
+                  "label": "¿Cómo estás?"
+                },
+                {
+                  "label": "Adiós"
+                }
+              ]
+            },
+            {
+              "label": "Cortesía",
+              "children": [
+                {
+                  "label": "Gracias"
+                },
+                {
+                  "label": "Por favor"
+                },
+                {
+                  "label": "Perdón"
+                },
+                {
+                  "label": "Te quiero"
+                }
+              ]
+            },
+            {
+              "label": "Aclarar",
+              "children": [
+                {
+                  "label": "Repite"
+                },
+                {
+                  "label": "Más despacio"
+                },
+                {
+                  "label": "Espera"
+                },
+                {
+                  "label": "No quería decir eso"
+                }
+              ]
+            },
+            {
+              "label": "Conversar",
+              "flags": [
+                "ia"
+              ],
+              "ia_prompt": "Cuatro frases para mantener la conversación, respondiendo a lo último que se le dijo. Si no hay nada que responder, frases de conversación generales.",
+              "fallback": [
+                "Cuéntame más",
+                "¿Y tú qué tal?",
+                "Qué interesante",
+                "Me alegra verte",
+                "¿Qué has hecho hoy?",
+                "Cuéntame novedades",
+                "Me gusta hablar contigo",
+                "Gracias por estar aquí"
+              ]
+            }
+          ]
+        },
+        {
+          "label": "Ajustes",
+          "children": [
+            {
+              "label": "Volumen de voz",
+              "flags": [
+                "aj"
+              ]
+            },
+            {
+              "label": "Pausar seguimiento",
+              "flags": [
+                "aj"
+              ]
+            },
+            {
+              "label": "Recalibrar",
+              "flags": [
+                "aj"
+              ]
+            },
+            {
+              "label": "Idioma",
+              "flags": [
+                "aj"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
