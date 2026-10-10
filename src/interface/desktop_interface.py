@@ -1,30 +1,41 @@
 import pygame
 import queue
 import cv2
+import time
 import numpy as np
-from src.core.contracts import VisionFrame
+from src.core.contracts import VisionFrame, GestureEvent
 
 class DesktopApp:
-    def __init__(self, input_queue: queue.Queue, width=800, height=600):
+    def __init__(self, input_queue: queue.Queue, gesture_engine=None):
+        print("DEBUG: Initializing DesktopApp...")
         pygame.init()
-        self.width = width
-        self.height = height
+        self.input_queue = input_queue
+        self.gesture_engine = gesture_engine
+        self.width = 800
+        self.height = 600
+        print(f"DEBUG: Attempting set_mode({self.width}, {self.height})...")
         self.screen = pygame.display.set_mode((self.width, self.height))
         pygame.display.set_caption("Melior - Desktop Vision Interface (Pygame)")
+        print("DEBUG: set_mode successful.")
 
-        self.input_queue = input_queue
         self.clock = pygame.time.Clock()
         self.running = True
         self.font = pygame.font.SysFont("Arial", 18)
         self.status_text = "Initializing..."
         self.log_messages = []
+        self.current_frame = None
 
     def run(self):
         """Main Pygame loop."""
+        print(f"DEBUG: Starting run() loop. self.running={self.running}")
         while self.running:
             # 1. Handle Events
-            for event in pygame.event.get():
+            events = pygame.event.get()
+            if events:
+                print(f"DEBUG: Events received: {[e.type for e in events]}")
+            for event in events:
                 if event.type == pygame.QUIT:
+                    print("DEBUG: QUIT event received")
                     self.running = False
 
             # 2. Process Queue
@@ -47,6 +58,7 @@ class DesktopApp:
             # 4. Cap Frame Rate
             self.clock.tick(30)
 
+        print(f"DEBUG: Loop exited. self.running={self.running}")
         self._cleanup()
 
     def _update_state(self, vision_frame: VisionFrame):
@@ -54,13 +66,16 @@ class DesktopApp:
         self.current_frame = vision_frame.frame
         self.status_text = f"Status: Active | Time: {vision_frame.timestamp:.2f}"
 
-        if vision_frame.landmarks:
-            self._log_message("Detected landmarks.")
+        # Process gestures if engine is provided
+        if self.gesture_engine:
+            gestures = self.gesture_engine.update(vision_frame)
+            for gesture in gestures:
+                self._log_message(f"Gesture: {gesture.event_type} ({gesture.target_id or ''}) conf: {gesture.confidence:.2f}")
 
     def _log_message(self, message: str):
         """Adds a message to the log."""
-        timestamp = pygame.time.get_ticks() // 1000
-        self.log_messages.append(f"[{timestamp}s] {message}")
+        timestamp = time.strftime('%H:%M:%S')
+        self.log_messages.append(f"[{timestamp}] {message}")
         if len(self.log_messages) > 5:
             self.log_messages.pop(0)
 
@@ -69,47 +84,44 @@ class DesktopApp:
         self.screen.fill((26, 26, 26)) # Dark background
 
         # 1. Draw Video Frame
-        if hasattr(self, 'current_frame') and self.current_frame is not None:
+        if self.current_frame is not None:
             frame = self.current_frame
             # Convert BGR to RGB
             frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-            # Create a surface from the frame
-            # We need to handle resizing to fit our window
+
+            # Resize frame to fit the window while maintaining aspect ratio
             h, w, _ = frame_rgb.shape
             target_aspect = w / h
-            window_aspect = self.width / self.height
+            window_aspect = self.width / (self.height - 120) # Leave space for status/logs
 
             if target_aspect > window_aspect:
-                # Frame is wider than window
                 new_w = self.width
                 new_h = int(self.width / target_aspect)
             else:
-                # Frame is taller than window
-                new_h = self.height
-                new_w = int(self.height * target_aspect)
+                new_h = self.height - 120
+                new_w = int((self.height - 120) * target_aspect)
 
-            # Resize frame using pygame (or numpy/cv2 before converting)
-            # Using cv2 for resize is often faster/better quality
+            # Use cv2 for high quality resize
             resized_frame = cv2.resize(frame_rgb, (new_w, new_h))
 
             # Convert to pygame surface
-            # Pygame expects (width, height) and (R, G, B)
-            # Note: numpy array is (H, W, C), pygame needs it as (W, H, C)
+            # Note: Pygame expects (width, height) and (R, G, B)
+            # numpy array is (H, W, C), so we transpose to (W, H, C)
             surface = pygame.surfarray.make_surface(resized_frame.transpose(1, 0, 2))
 
             # Center the surface
             x_offset = (self.width - new_w) // 2
-            y_offset = (self.height - new_h) // 2
+            y_offset = (self.height - 120 - new_h) // 2
             self.screen.blit(surface, (x_offset, y_offset))
 
         # 2. Draw Status
         status_surf = self.font.render(self.status_text, True, (255, 255, 255))
-        self.screen.blit(status_surf, (10, self.height - 60))
+        self.screen.blit(status_surf, (10, self.height - 80))
 
         # 3. Draw Logs
         for i, msg in enumerate(self.log_messages):
             log_surf = self.font.render(msg, True, (170, 170, 170))
-            self.screen.blit(log_surf, (10, self.height - 35 + (i * 15)))
+            self.screen.blit(log_surf, (10, self.height - 55 + (i * 18)))
 
         pygame.display.flip()
 

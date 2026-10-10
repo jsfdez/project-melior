@@ -7,7 +7,7 @@ from src.interaction.gesture_engine import GestureConfig, GestureEngine
 
 
 def vf(t, yaw=0.0, pitch=0.0, blink=0.0):
-    return VisionFrame(timestamp=t, head_pose=HeadPose(pitch=pitch, yaw=yaw, roll=0.0), blink=blink)
+    return VisionFrame(timestamp=t, head_pose=HeadPose(pitch=pitch, yaw=yaw, roll=0.0), blink=blink, frame=None)
 
 
 class Sim:
