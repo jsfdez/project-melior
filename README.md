@@ -30,6 +30,30 @@ git clone https://github.com/jsfdez/project-melior.git
 git clone git@github.com:jsfdez/project-melior.git
 ```
 
+### 🛠️ Setting Up the Sandbox
+
+To ensure zero external dependencies and a fully isolated environment, this project uses a local Python virtual environment. **Do not install requirements globally.**
+
+Run the provided setup script to initialize your sandbox:
+
+```bash
+chmod +x setup.sh
+./setup.sh
+```
+
+After setup, always activate the environment before working:
+```bash
+source venv/bin/activate
+```
+
+## 🛡️ Sandboxing & Isolation
+
+This project is designed to run as a **self-contained sandbox**. 
+
+* **Zero OOB Dependencies:** No system-level Python packages should be used. Everything required is listed in `requirements.txt` and installed within the local `venv/`.
+* **Environment Isolation:** All sensitive configuration (API keys, endpoints) must be managed via a `.env` file, which is excluded from version control.
+* **Predictable Environment:** By using the `setup.sh` script, every team member works in an identical, isolated environment, preventing "it works on my machine" issues.
+
 
 ## Use Claude Code
 
