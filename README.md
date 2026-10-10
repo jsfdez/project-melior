@@ -9,7 +9,12 @@ export ANTHROPIC_API_KEY=none
 claude --model=gemma-4-26b-a4b
 ```
 
-## To do model requests
+## Program constraints
+
+- Use Python
+- Use Gemma-4-26b-a4b
+
+## To make LLM requests
 
 ```
 curl https://bubbly-vermilion.netbird.apps.buildinmadrid.dev/v1/chat/completions \
