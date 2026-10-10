@@ -43,18 +43,26 @@ chmod +x setup.sh
 
 ### 🚀 Running the Project
 
-To run any script within the project sandbox (ensuring the virtual environment is used), use the `run.sh` utility:
+To run any script within the project sandbox, use the `run.sh` utility. It automatically handles the virtual environment and updates dependencies if `requirements.txt` has changed.
 
 ```bash
 chmod +x run.sh
-./run.sh <path_to_your_script.py> [arguments...]
+./run.sh <path_to_script.py> [arguments...]
 ```
 
-Example:
+**Default Behavior:**
+If no script is provided, it defaults to running `main.py`.
+
+**Example:**
 ```bash
-./run.sh main.py
+./run.sh
 ```
-This script will automatically check for and initialize the virtual environment if it doesn't exist.
+*(Runs main.py)*
+
+```bash
+./run.sh src/core/contracts.py
+```
+*(Runs the specific script)*
 
 ## 🛡️ Sandboxing & Isolation
 
