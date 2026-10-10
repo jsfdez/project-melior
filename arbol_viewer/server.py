@@ -75,7 +75,7 @@ class Handler(BaseHTTPRequestHandler):
     # ------------------------------------------------------------------ GET
     def do_GET(self):
         url = urllib.parse.urlparse(self.path)
-        if url.path in ("/", "/index.html"):
+        if url.path in ("/", "/index.html", "/admin", "/admin/"):
             with open(os.path.join(HERE, "index.html"), "rb") as f:
                 self._send(200, f.read(), "text/html; charset=utf-8")
         elif url.path == "/api/tree":

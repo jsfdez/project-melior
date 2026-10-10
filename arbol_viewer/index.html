@@ -43,7 +43,7 @@
   .btn { border:1px solid var(--line); background:var(--panel); border-radius:12px; padding:7px 14px; font-size:14px; transition:border-color .15s, background .15s; }
   .btn:hover:not(:disabled) { border-color:var(--accent); }
   .btn.primary { background:var(--accent); border-color:var(--accent); color:var(--accent-ink); font-weight:700; }
-  .btn.ghost { background:transparent; }
+  .btn.ghost { background:transparent; text-decoration:none; color:var(--text); }
   .btn:disabled { opacity:.4; cursor:not-allowed; }
 
   /* ---------- disposición */
@@ -144,11 +144,31 @@
   .outline a { color:var(--text); cursor:pointer; } .outline a:hover { color:var(--accent); text-decoration:underline; }
   .outline a.cur { color:var(--accent); font-weight:700; }
 
+  /* ---------- cámara (admin) */
+  .feed { position:relative; aspect-ratio:4/3; border-radius:16px; overflow:hidden; background:var(--bg-2); display:grid; place-items:center;
+          color:var(--muted); font-size:14px; margin-bottom:14px; }
+  .feed img { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
+  .feed img[hidden], #camoff[hidden] { display:none; }
+  #learn .hist { margin:0; border:0; padding:0; } #learn .hist ul { max-height:none; padding-left:0; list-style:none; }
+  #learn .hist li { padding:8px 0; border-bottom:1px solid var(--line); color:var(--text); }
+  #learn .hist li .meta { display:block; }
+
+  /* ---------- modo admin (demo): cámara y aprendizaje a la izquierda, decisiones a la derecha, editor debajo */
+  body[data-mode=admin] main { grid-template-columns:minmax(320px,.75fr) minmax(0,1.6fr);
+    grid-template-areas:"side stage" "learn stage" "editor editor"; }
+  body[data-mode=admin] #side { grid-area:side; } body[data-mode=admin] .stage { grid-area:stage; }
+  body[data-mode=admin] #learn { grid-area:learn; } body[data-mode=admin] #editor { grid-area:editor; }
+  body[data-mode=admin] #learn .hist ul { max-height:340px; overflow:auto; }
+  body[data-mode=admin] .live { margin-bottom:16px; }
+  body[data-mode=admin] .tools { margin:0; } body[data-mode=admin] .tools input[type=text] { flex-basis:100%; }
+
   /* ---------- modo usuario: solo la cruz, a pantalla completa */
   body[data-mode=user] main { grid-template-columns:1fr; max-width:1200px; margin:0 auto; }
-  body[data-mode=user] #editor, body[data-mode=user] .tools, body[data-mode=user] .caretaker { display:none; }
+  body[data-mode=user] #editor, body[data-mode=user] #learn, body[data-mode=user] .tools, body[data-mode=user] .caretaker,
+  body[data-mode=user] .admin { display:none; }
   body[data-mode=user] section.panel.stage { background:transparent; border:0; box-shadow:none; padding:0; }
-  body[data-mode=user] .live { position:absolute; top:14px; right:24px; margin:0; z-index:5; }
+  body[data-mode=user] #side { position:absolute; top:14px; right:24px; z-index:5; background:none; border:0; box-shadow:none; padding:0; }
+  body[data-mode=user] .live { margin:0; }
   body[data-mode=user] .live .chips { justify-content:flex-end; }
   body[data-mode=user] .live .chip:not(.key) { display:none; }
   body[data-mode=user] #recal { background:var(--panel); box-shadow:var(--shadow); }
@@ -163,8 +183,28 @@
     body[data-mode] .cross { gap:8px; grid-template-rows:repeat(3,minmax(96px,auto)); }
     .opt { padding:30px 6px 12px; } body[data-mode] .opt .lbl { font-size:17px; } body[data-mode] .center strong { font-size:19px; }
     body[data-mode] .banner { font-size:17px; } body[data-mode=user] main { padding-bottom:16px; }
-    body[data-mode=user] .live { display:none; }
+    body[data-mode=user] #side { display:none; }
   }
+
+  /* ---------- recalibrar: cámara + punto central de referencia */
+  .calib { position:fixed; inset:0; z-index:50; display:grid; place-items:center; background:color-mix(in srgb, var(--bg) 94%, transparent);
+           backdrop-filter:blur(6px); }
+  .calib[hidden] { display:none; }
+  .calib .feed { width:min(640px,62vw); aspect-ratio:4/3; border-radius:28px; overflow:hidden; background:#000; opacity:.6; box-shadow:var(--shadow); }
+  .calib .feed img { width:100%; height:100%; object-fit:cover; display:block; }
+  .calib .target { position:fixed; left:50%; top:50%; width:0; height:0; }
+  .calib .target i { position:absolute; left:-14px; top:-14px; width:28px; height:28px; border-radius:50%; background:var(--accent);
+           box-shadow:0 0 0 6px var(--panel), 0 0 0 9px var(--accent); }
+  .calib .target b { position:absolute; left:-46px; top:-46px; width:92px; height:92px; border-radius:50%; border:3px solid var(--accent);
+           animation:ring 1.6s ease-out infinite; }
+  .calib .target span { position:absolute; left:50%; top:34px; transform:translateX(-50%); white-space:nowrap; font:600 30px/1 var(--display);
+           color:var(--text); background:var(--panel); padding:8px 18px; border-radius:999px; box-shadow:var(--shadow); }
+  @keyframes ring { from { transform:scale(.6); opacity:1; } to { transform:scale(1.5); opacity:0; } }
+  .calib.done .target i { background:var(--ok); box-shadow:0 0 0 6px var(--panel), 0 0 0 9px var(--ok); }
+  .calib.done .target b { display:none; }
+  .calib .msg { position:fixed; left:0; right:0; bottom:9vh; text-align:center; font-size:22px; font-weight:700; }
+  .calib .msg small { display:block; font-size:15px; font-weight:400; color:var(--muted); margin-top:6px; }
+  .calib .close { position:fixed; top:18px; right:24px; }
   @media (prefers-reduced-motion: reduce) { * { animation:none !important; transition:none !important; } }
 </style>
 </head>
@@ -175,11 +215,14 @@
     <h1>Melior</h1>
   </div>
   <label class="opts-voice caretaker"><input type="checkbox" id="voice"> Voz del navegador si falla ElevenLabs</label>
+  <a class="btn ghost caretaker" href="/" title="Vista del usuario">Vista usuario</a>
   <span id="status" class="caretaker">Cargando…</span>
   <button class="btn primary caretaker" id="save">Guardar</button>
 </header>
 <main>
-  <section class="panel stage">
+  <section class="panel" id="side">
+    <h2 class="admin">Cámara en vivo</h2>
+    <div class="feed admin" id="feed"><img id="cam" alt="Vista de la cámara" hidden><span id="camoff">Cámara apagada</span></div>
     <div class="live">
       <div class="chips">
         <span class="chip key"><span class="dot" id="d-cam"></span><span id="t-cam">Cámara…</span></span>
@@ -189,11 +232,14 @@
         <button class="btn" id="recal">Recalibrar · mira al frente</button>
       </div>
     </div>
+    <h2 class="admin">Contexto</h2>
     <div class="tools">
       <input type="text" id="heard" placeholder="Lo último que se le dijo (para nodos IA)">
       <label>Hora simulada <input type="time" id="clock"></label>
       <label><input type="checkbox" id="usehist" checked> Usar historial</label>
     </div>
+  </section>
+  <section class="panel stage">
     <div class="crumbs" id="crumbs"></div>
     <div class="cross" id="cross"></div>
     <div class="banner" id="banner" aria-live="polite"></div>
@@ -226,14 +272,23 @@
     <h2 style="margin-top:24px">Opciones <span class="count" id="count2"></span></h2>
     <div id="rows"></div>
     <button class="btn" id="add">+ Añadir opción</button>
-    <div class="hist"><b>Historial (aprendizaje)</b> <span class="meta" id="histcount"></span>
+    <details class="outline"><summary>Ver árbol completo</summary><div id="outline"></div></details>
+  </section>
+  <section class="panel" id="learn">
+    <h2>Aprendizaje <span class="count" id="histcount"></span></h2>
+    <div class="hist">
       <ul id="histlist"></ul>
       <button class="btn" id="histclear">Borrar historial</button>
       <div class="meta" style="margin-top:6px">Solo en este equipo (data/user_history.jsonl, fuera de git). Con el endpoint compartido no uses datos reales de salud.</div>
     </div>
-    <details class="outline"><summary>Ver árbol completo</summary><div id="outline"></div></details>
   </section>
 </main>
+<div class="calib" id="calib" hidden role="dialog" aria-label="Recalibrar">
+  <div class="feed"><img id="calibcam" alt=""></div>
+  <div class="target"><b></b><i></i><span id="calibtxt">Mira aquí</span></div>
+  <p class="msg"><span id="calibmsg">Mira el punto y no te muevas</span><small id="calibsub"></small></p>
+  <button class="btn close" id="calibclose">Cancelar (Esc)</button>
+</div>
 <script>
 const MAX = 4, KEYS = {ArrowUp: "up", ArrowDown: "down", ArrowLeft: "left", ArrowRight: "right"};
 const ARROWS = ["↑", "↓", "←", "→"], DIRS = ["up", "down", "left", "right"];
@@ -284,11 +339,17 @@ function renderLive(s) {
   $("d-cam").className = "dot " + (l.state === "running" && !l.face ? "wait" : cam[0]);
   $("t-cam").textContent = cam[1]; $("t-cam").title = l.error || "";
   const want = l.state === "running";
+  if (document.body.dataset.mode === "admin") {
+    if (want && $("cam").hidden) { $("cam").src = "/api/camera.mjpg"; $("cam").hidden = false; }
+    if (!want && !$("cam").hidden) { $("cam").hidden = true; $("cam").removeAttribute("src"); }
+    $("camoff").hidden = want; $("camoff").textContent = cam[1];
+  }
   $("d-cal").className = "dot " + (l.calibrated ? "ok" : want ? "wait" : "");
   $("t-cal").textContent = l.calibrated ? "Calibrado" : want ? "Calibrando… mira al frente" : "Sin calibrar";
   $("d-voice").className = "dot " + (s.voice.configured ? "ok" : "bad");
   $("t-voice").textContent = s.voice.configured ? "ElevenLabs configurado" : "ElevenLabs sin clave (.env)";
   $("recal").disabled = !want;
+  calibUpdate(l);
 }
 
 async function onSpeech(sp) {
@@ -320,15 +381,48 @@ async function poll() {
 const sendGesture = (event_type, target_id) => post("/api/gesture", {event_type, target_id});
 document.addEventListener("keydown", e => {
   if (e.target.matches("input, textarea")) return;
+  if (calib) { if (e.key === "Escape") calibClose(); e.preventDefault(); return; }
   if (KEYS[e.key]) { e.preventDefault(); sendGesture("dwell", KEYS[e.key]); }
   else if (e.key === "Escape" || e.key === "Backspace") { e.preventDefault(); sendGesture("back"); }
 });
 const sendContext = () => post("/api/context", {heard: $("heard").value, clock: $("clock").value, use_history: $("usehist").checked});
 ["heard", "clock", "usehist"].forEach(id => $(id).addEventListener("input", sendContext));
-$("recal").onclick = () => post("/api/recalibrate");
+// Recalibrar: cuenta atrás mirando el punto central, luego calibra y se cierra sola.
+let calib = null;  // {phase: "count"|"wait"|"done", timer, sawFalse}
+function calibClose() {
+  if (!calib) return;
+  clearTimeout(calib.timer); calib = null;
+  $("calib").hidden = true; $("calib").classList.remove("done"); $("calibcam").removeAttribute("src");
+}
+function calibStart() {
+  calibClose();
+  calib = {phase: "count", sawFalse: false};
+  $("calibcam").src = "/api/camera.mjpg"; $("calib").hidden = false;
+  $("calibtxt").textContent = "Mira aquí"; $("calibmsg").textContent = "Mira el punto y no te muevas";
+  let n = 3;
+  const tick = () => {
+    if (!calib) return;
+    if (n > 0) { $("calibsub").textContent = `Empieza en ${n}…`; n--; calib.timer = setTimeout(tick, 1000); return; }
+    calib.phase = "wait"; $("calibsub").textContent = "Calibrando…";
+    post("/api/recalibrate");
+  };
+  tick();
+}
+function calibUpdate(l) {
+  if (!calib || calib.phase !== "wait") return;
+  if (l.state !== "running") { $("calibsub").textContent = "La cámara no está activa"; return; }
+  if (!l.face) { $("calibsub").textContent = "No veo tu cara: ponte frente a la cámara"; return; }
+  if (!l.calibrated) { calib.sawFalse = true; $("calibsub").textContent = "Calibrando…"; return; }
+  if (!calib.sawFalse) return;  // aún no ha llegado el reinicio
+  calib.phase = "done"; $("calib").classList.add("done");
+  $("calibtxt").textContent = "¡Listo!"; $("calibmsg").textContent = "Calibrado"; $("calibsub").textContent = "";
+  calib.timer = setTimeout(calibClose, 1200);
+}
+$("recal").onclick = calibStart;
+$("calibclose").onclick = calibClose;
 
-// Por defecto solo la vista del usuario; ?mode=care muestra el editor del árbol.
-if (new URLSearchParams(location.search).get("mode") === "care") document.body.dataset.mode = "care";
+// "/" = vista del usuario; "/admin" = demo completa (cámara, aprendizaje, editor del árbol).
+if (location.pathname.replace(/\/+$/, "") === "/admin") document.body.dataset.mode = "admin";
 
 // ------------------------------------------------------------------ editor
 const cur = () => safeNodeAt(state ? state.path : []);
