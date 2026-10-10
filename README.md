@@ -1,6 +1,21 @@
 # project-melior
 Hacktoberfest 2026 project 
 
+## What is Melior
+
+Melior is an assistive communication app for people with limited motor and speech abilities who can only move their head.
+
+The user controls the app with head movements only. The app proposes what they probably want to say or need, and the user picks it. The chosen phrase is spoken out loud.
+
+```
+Webcam -> head tracking (MediaPipe Face Landmarker) -> gestures (move, dwell, nod, shake)
+                                                          |
+                          Gemma suggests 4-6 phrases / needs (JSON)
+                                                          |
+                             user selects with the head   v
+                                    ElevenLabs speaks it through the speakers
+```
+
 ## Use Claude Code
 
 ```
@@ -13,13 +28,40 @@ claude --model=gemma-4-26b-a4b
 
 - Use Python
 - Use Gemma-4-26b-a4b
-- Use elevenlabs.io if possible
+- Use elevenlabs.io (mandatory)
 
 ## Application features
 
 - Use webcam
-- Use microphone
 - Use speakers
+- Microphone: not in the MVP, possible future option
+
+### How each one is used
+
+| Feature | Used for |
+|---|---|
+| Webcam | Head tracking with MediaPipe Face Landmarker. Video is processed locally and never leaves the device |
+| Microphone | Not used in the MVP. Future option: listen to the person talking to the user so Gemma can suggest replies |
+| Speakers | Plays the phrase chosen by the user, generated with ElevenLabs |
+
+### Interaction
+
+| Gesture | Action |
+|---|---|
+| Turn / tilt the head | Move the cursor or highlight the next option |
+| Hold on an option (~1 s, dwell) | Select it |
+| Nod | Yes / confirm |
+| Shake | No / cancel |
+
+Planned: per-user calibration, smoothing (One Euro filter) and an adjustable dead zone and dwell time, because every user has a different range of movement.
+
+## Architecture
+
+- **Head tracking:** MediaPipe Face Landmarker (Python). Head pose from the facial transformation matrix, optional blendshapes (blink, jaw open) as alternative gestures.
+- **Gestures:** a gesture engine separated from the UI that emits simple events (`move`, `dwell`, `nod`, `shake`), so it can be tested without Gemma or ElevenLabs.
+- **LLM:** Gemma via the OpenAI-compatible endpoint below. It must answer with a short JSON list of options. It never speaks on behalf of the user without a selection.
+- **Voice:** ElevenLabs text-to-speech (mandatory), with a cache for frequent phrases to cut latency and cost. The API key stays in an environment variable.
+- **Fallback:** a small set of critical phrases (pain, help, emergency) prerecorded or spoken with a local TTS if the network or the LLM is down.
 
 ## To make LLM requests
 
@@ -33,3 +75,39 @@ curl https://bubbly-vermilion.netbird.apps.buildinmadrid.dev/v1/chat/completions
     ]
   }'
 ```
+
+Note: the model name in this example comes from the template. For Melior use `gemma-4-26b-a4b`.
+
+## Configuration
+
+Keep these out of the code (environment variables):
+
+| Variable | Purpose |
+|---|---|
+| `LLM_BASE_URL` | Gemma endpoint (`https://bubbly-vermilion.netbird.apps.buildinmadrid.dev`) |
+| `LLM_MODEL` | `gemma-4-26b-a4b` |
+| `ELEVENLABS_API_KEY` | ElevenLabs key |
+| `ELEVENLABS_VOICE_ID` | Voice to use |
+
+## Privacy and safety
+
+- Camera video is processed on the device only.
+- Send the LLM and ElevenLabs only the minimum text needed. No personal or health data while the LLM endpoint is shared.
+- Critical actions (emergency, alert) need a confirmation to avoid false positives.
+
+## Open decisions (to complete)
+
+- [ ] **UI in Python:** desktop window (OpenCV / pygame / Tkinter) or a local web UI served by Python (FastAPI / NiceGUI)?
+- [ ] **MVP level:** needs board reordered by Gemma (microphone is out of the MVP).
+- [ ] **First real user / therapist** to validate the interaction.
+- [ ] **Languages:** Spanish first, English later?
+- [ ] **Emergency fallback:** which phrases and which local voice?
+- [ ] **Voice:** generic ElevenLabs voice or a cloned one (needs consent)?
+- [ ] **Repo structure and how to run** (to fill in once the first prototype exists).
+
+## Roadmap
+
+1. Prototype: webcam + smoothed cursor + dwell + 6 buttons + ElevenLabs speech (no Gemma).
+2. Add Gemma suggestions through the endpoint above.
+3. Future option: microphone input (speech-to-text) and replies to what the other person says.
+4. Calibration, fallback mode and tests with a real user.
