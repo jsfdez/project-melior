@@ -161,7 +161,7 @@ MÁS
 
 Reglas para todos los nodos de IA:
 
-- Gemma devuelve una lista JSON corta de **4 opciones** como máximo, de pocas palabras.
+- Cada llamada a Gemma devuelve una lista JSON de **6 frases** ordenadas, de pocas palabras. La pantalla enseña las **3 mejores**; la 4.ª posición es siempre **↓ «Más opciones»**, que enseña las otras 3 al instante y, en ese momento, lanza en segundo plano una llamada nueva con 6 frases distintas (sin repetir nada de lo ya generado en esa visita al nodo). Si Gemma no está disponible, se usan las opciones de reserva del nodo (más de 3, para poder seguir pasando tandas).
 - Entrada mínima: hora del día y últimas frases. Sin datos personales ni de salud mientras el endpoint sea compartido.
 - Gemma **nunca habla en nombre del usuario sin una selección**.
 - Si la red o el LLM fallan, el nodo muestra opciones estáticas de reserva.
