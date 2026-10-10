@@ -106,14 +106,60 @@ claude --model=gemma-4-26b-a4b
 
 ### Interaction
 
-| Gesture | Action |
-|---|---|
-| Turn / tilt the head | Move the cursor or highlight the next option |
-| Hold on an option (~1 s, dwell) | Select it |
-| Nod | Yes / confirm |
-| Shake | No / cancel |
+Current implementation ("point and hold", head + long blink only):
 
-Planned: per-user calibration, smoothing (One Euro filter) and an adjustable dead zone and dwell time, because every user has a different range of movement.
+| Gesture | Event | Action |
+|---|---|---|
+| Move the head slightly left / right / up / down and keep it there (~0.35 s) | `move` with `target_id` = `left`/`right`/`up`/`down` | Highlight that option |
+| Keep the head still on it (~1.2 s) | `dwell` with the same `target_id` | Select it |
+| Return to the center | (re-arms) | Ready for the next choice |
+| Long blink (~0.6 s) | `back` | Go back / cancel |
+
+Quick passes and jitter are ignored (direction must be stable before `move`, and the head can drift ~2.5° during the dwell). After a `dwell`, the head must return to the center before the next one. Short natural blinks are ignored.
+
+Original ideas not implemented yet: nod = yes, shake = no.
+
+Planned: One Euro filter and per-user ranges, because every user has a different range of movement.
+
+## Vision & gestures (how to run)
+
+Code: `src/vision/head_tracker.py` (webcam -> `VisionFrame`), `src/interaction/gesture_engine.py` (`VisionFrame` -> `GestureEvent`), `demo_gestures.py` (live demo), `tests/test_gesture_engine.py`.
+
+```bash
+./setup.sh                                  # Linux/macOS; on Windows: python -m venv venv && venv\Scripts\pip install -r requirements.txt
+python demo_gestures.py                     # Esc quits, R recalibrates the neutral pose
+python -m unittest discover -s tests -t .   # tests (no camera needed)
+```
+
+Windows quick launch (from the repo folder): `.\venv\Scripts\python.exe demo_gestures.py`.
+The demo needs the GUI build of OpenCV (`opencv-python`); `requirements.txt` lists `opencv-python-headless`, which has no window. `HeadTracker` and `GestureEngine` work with either. If the demo says `imshow` is missing: `pip uninstall -y opencv-python-headless && pip install opencv-python`.
+Events: `move` (direction highlighted), `dwell` (held still ~1 s = select), `back` (long blink). Selecting by holding a direction matches `ArbolConversacion.md`; "Back" is the long blink instead of holding the center.
+
+The first run downloads `models/face_landmarker.task` (~4 MB, git-ignored). Tested with Python 3.14 and `mediapipe` 1.1.0.
+
+Usage from the main loop:
+
+```python
+from src.vision.head_tracker import HeadTracker
+from src.interaction.gesture_engine import GestureEngine
+
+engine = GestureEngine()
+with HeadTracker() as tracker:
+    while True:
+        frame, vision_frame = tracker.read()      # vision_frame is None if no face is visible
+        for event in engine.update(vision_frame):  # GestureEvent("move"|"dwell", "left"...) / ("back")
+            ...
+```
+
+How it works:
+
+- Head pose (yaw/pitch/roll in degrees) comes from the Face Landmarker facial transformation matrix; the blink score is the mean of the `eyeBlinkLeft`/`eyeBlinkRight` blendshapes.
+- The neutral pose is learned from the first ~1.5 s (keep still, looking at the screen). Gestures are measured relative to it.
+- Tunables are in `GestureConfig`: `yaw_deg`/`pitch_deg` (how far to move, lower = more sensitive), `stable_s` (time before highlighting), `dwell_s` (stillness to select), `still_deg`, blink threshold/duration, smoothing.
+- If directions come out inverted on your camera, flip `yaw_sign` / `pitch_sign` (defaults are already flipped for a typical webcam).
+- Timestamps passed to `detect_for_video` must always increase; `HeadTracker` guarantees it.
+
+Known to verify with real users: angle thresholds and the long-blink duration.
 
 ## Architecture
 

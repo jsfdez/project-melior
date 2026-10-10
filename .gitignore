@@ -11,6 +11,9 @@ ENV/
 # Secrets
 .env
 
+# MediaPipe model (downloaded on first run)
+models/
+
 # IDEs
 .vscode/
 .idea/
