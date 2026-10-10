@@ -16,6 +16,21 @@ Webcam -> head tracking (MediaPipe Face Landmarker) -> gestures (move, dwell, no
                                     ElevenLabs speaks it through the speakers
 ```
 
+## Getting Started
+
+To clone the repository, use one of the following commands:
+
+**Using HTTPS:**
+```bash
+git clone https://github.com/jsfdez/project-melior.git
+```
+
+**Using SSH:**
+```bash
+git clone git@github.com:jsfdez/project-melior.git
+```
+
+
 ## Use Claude Code
 
 ```
