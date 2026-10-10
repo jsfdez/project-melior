@@ -120,6 +120,22 @@ Original ideas not implemented yet: nod = yes, shake = no.
 
 Planned: One Euro filter and per-user ranges, because every user has a different range of movement.
 
+## Integrated test localhost (everything wired together)
+
+Camera -> MediaPipe -> gesture engine -> tree navigator -> Gemma / history -> ElevenLabs, with a web page to see it, test it and edit the tree.
+
+```bash
+python3 -m venv venv && ./venv/bin/pip install opencv-python-headless mediapipe numpy pydantic pytest   # once
+./venv/bin/python arbol_viewer/server.py            # http://localhost:8000   (add --no-camera for keyboard only)
+./venv/bin/python -m pytest tests                   # navigator + live-input + gesture tests
+```
+
+- **Run it from your own terminal**: macOS asks for camera permission for the app that launches the process (Terminal, VS Code...). The page shows camera / calibration / voice status; look straight ahead for ~2 s to calibrate (the "Recalibrar" button redoes it).
+- **Without camera**: arrow keys select, `Esc` / `Backspace` goes back. Same code path as the gestures (`POST /api/gesture`).
+- **Gemma** needs NetBird connected: set `LLM_BASE_URL=http://100.89.200.254:8000` in `.env` (the proxy URL in `.env.example` answers 403 from some machines). If Gemma fails, every `[IA]` node falls back to its static options.
+- **Voice**: `ELEVENLABS_API_KEY` and `ELEVENLABS_VOICE_ID` go in `.env`, never in `.env.example` (that one is committed). `python -m src.intelligence.voice warm` pre-generates the tree phrases into `data/tts_cache`.
+- **Code**: `src/interaction/navigator.py` (state machine, UI-agnostic, reusable from the Pygame app), `src/interaction/live.py` (camera thread), `arbol_viewer/` (server + page).
+
 ## Vision & gestures (how to run)
 
 Code: `src/vision/head_tracker.py` (webcam -> `VisionFrame`), `src/interaction/gesture_engine.py` (`VisionFrame` -> `GestureEvent`), `demo_gestures.py` (live demo), `tests/test_gesture_engine.py`.

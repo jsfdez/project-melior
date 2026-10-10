@@ -3,102 +3,192 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Melior · árbol</title>
+<title>Melior</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Fraunces:opsz,wght@9..144,600&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg:#f4f5f7; --panel:#fff; --text:#1c2230; --muted:#667085; --line:#d9dde5;
-    --accent:#2f6fed; --accent-soft:#e6eefc; --ia:#7a4de0; --crit:#d92d20; --aj:#667085;
+    --bg:#f5f1ea; --bg-2:#ece6db; --panel:#fffdf9; --text:#1f1c17; --muted:#6f675c; --line:#e0d8ca;
+    --accent:#0f766e; --accent-ink:#ffffff; --accent-soft:#d8efe9;
+    --ia:#6d4bd8; --ia-soft:#ece6fb; --crit:#c2410c; --crit-soft:#fbe5d8; --aj:#6f675c; --ok:#15803d; --warn:#d97706;
+    --shadow:0 1px 2px rgba(60,40,10,.06), 0 6px 20px rgba(60,40,10,.06);
+    --radius:22px;
+    --font:"Atkinson Hyperlegible",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    --display:"Fraunces",Georgia,serif;
+    color-scheme: light;
   }
   @media (prefers-color-scheme: dark) {
-    :root { --bg:#12151c; --panel:#1b2030; --text:#e8ebf2; --muted:#98a2b3; --line:#2f364a;
-            --accent:#6c9bff; --accent-soft:#232c47; --ia:#a98bff; --crit:#ff6b5e; --aj:#98a2b3; }
+    :root { --bg:#14130f; --bg-2:#1c1a15; --panel:#211f19; --text:#f3eee4; --muted:#a69d8f; --line:#35312a;
+            --accent:#2dd4bf; --accent-ink:#06201d; --accent-soft:#143b36;
+            --ia:#a993ff; --ia-soft:#2a2442; --crit:#fb8a5b; --crit-soft:#3d2216; --aj:#a69d8f; --ok:#4ade80; --warn:#fbbf24;
+            --shadow:0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.25); color-scheme: dark; }
   }
-  * { box-sizing: border-box; }
-  body { margin:0; font:15px/1.4 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
-         background:var(--bg); color:var(--text); }
-  header { display:flex; align-items:center; gap:12px; padding:12px 20px; border-bottom:1px solid var(--line); background:var(--panel); }
-  header h1 { font-size:17px; margin:0; flex:1; }
-  main { display:grid; grid-template-columns:minmax(0,1.3fr) minmax(0,1fr); gap:16px; padding:16px 20px; }
-  @media (max-width:980px) { main { grid-template-columns:1fr; } }
-  section { background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:16px; }
-  h2 { font-size:13px; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); margin:0 0 12px; }
+  * { box-sizing:border-box; }
+  html, body { height:100%; }
+  body { margin:0; font:16px/1.45 var(--font); background:var(--bg); color:var(--text); -webkit-font-smoothing:antialiased; }
   button { font:inherit; color:inherit; cursor:pointer; }
-  .btn { border:1px solid var(--line); background:var(--panel); border-radius:8px; padding:6px 12px; }
-  .btn:hover { border-color:var(--accent); }
-  .btn.primary { background:var(--accent); border-color:var(--accent); color:#fff; }
-  .btn:disabled { opacity:.45; cursor:not-allowed; }
-  .crumbs { display:flex; flex-wrap:wrap; gap:4px; align-items:center; margin-bottom:12px; color:var(--muted); }
-  .crumbs button { border:0; background:none; color:var(--accent); padding:2px 4px; border-radius:4px; }
-  .crumbs button:hover { background:var(--accent-soft); }
-  .cross { display:grid; grid-template-columns:1fr 1fr 1fr; grid-template-rows:repeat(3,minmax(110px,auto));
-           gap:10px; max-width:720px; margin:0 auto; }
-  .opt { position:relative; border:2px solid var(--line); background:var(--bg); border-radius:14px; padding:12px;
-         font-size:20px; font-weight:600; display:flex; flex-direction:column; align-items:center; justify-content:center;
-         text-align:center; gap:6px; }
-  .opt:hover:not(:disabled) { border-color:var(--accent); background:var(--accent-soft); }
-  .opt:disabled { opacity:.35; border-style:dashed; cursor:default; }
-  .opt .dir { position:absolute; top:6px; left:10px; font-size:13px; color:var(--muted); font-weight:400; }
-  .opt .sub { font-size:12px; font-weight:400; color:var(--muted); }
-  .opt.pending { border-color:var(--crit); background:color-mix(in srgb, var(--crit) 14%, transparent); }
+  :focus-visible { outline:3px solid var(--accent); outline-offset:2px; }
+
+  /* ---------- cabecera */
+  header { display:flex; align-items:center; gap:14px; padding:14px 24px; flex-wrap:wrap; }
+  .brand { display:flex; align-items:center; gap:10px; flex:1; min-width:0; }
+  .brand h1 { font:600 26px/1 var(--display); margin:0; letter-spacing:-.01em; }
+  .logo { width:34px; height:34px; border-radius:11px; background:var(--accent); display:grid; place-items:center; color:var(--accent-ink); }
+  .logo svg { width:20px; height:20px; }
+  .opts-voice { display:flex; gap:7px; align-items:center; font-size:13px; color:var(--muted); }
+  #status { font-size:13px; color:var(--muted); } #status.dirty { color:var(--crit); }
+
+  /* ---------- botones */
+  .btn { border:1px solid var(--line); background:var(--panel); border-radius:12px; padding:7px 14px; font-size:14px; transition:border-color .15s, background .15s; }
+  .btn:hover:not(:disabled) { border-color:var(--accent); }
+  .btn.primary { background:var(--accent); border-color:var(--accent); color:var(--accent-ink); font-weight:700; }
+  .btn.ghost { background:transparent; }
+  .btn:disabled { opacity:.4; cursor:not-allowed; }
+
+  /* ---------- disposición */
+  main { display:grid; grid-template-columns:minmax(0,1.45fr) minmax(340px,1fr); gap:20px; padding:4px 24px 24px; align-items:start; }
+  @media (max-width:1040px) { main { grid-template-columns:1fr; } }
+  section.panel { background:var(--panel); border:1px solid var(--line); border-radius:var(--radius); padding:20px; box-shadow:var(--shadow); }
+  h2 { font-size:12px; text-transform:uppercase; letter-spacing:.08em; color:var(--muted); margin:0 0 12px; font-weight:700; }
+
+  /* ---------- estado en vivo */
+  .live { display:flex; gap:16px; align-items:center; flex-wrap:wrap; margin-bottom:16px; }
+  .chips { display:flex; flex-wrap:wrap; gap:8px; flex:1; align-content:flex-start; }
+  .chip { display:inline-flex; gap:8px; align-items:center; font-size:13px; padding:6px 12px; border-radius:999px; background:var(--bg); border:1px solid var(--line); }
+  .dot { width:9px; height:9px; border-radius:50%; background:var(--muted); display:inline-block; flex:none; }
+  .dot.ok { background:var(--ok); box-shadow:0 0 0 3px color-mix(in srgb, var(--ok) 22%, transparent); }
+  .dot.bad { background:var(--crit); } .dot.wait { background:var(--warn); animation:pulse 1.2s ease-in-out infinite; }
+  @keyframes pulse { 50% { opacity:.35; } }
+  .chips .btn { border-radius:999px; font-size:13px; }
+
+  .tools { display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin-bottom:16px; font-size:13px; color:var(--muted); }
+  .tools input[type=text] { flex:1; min-width:200px; width:auto; }
+  .tools label { display:flex; gap:6px; align-items:center; }
+  .tools input[type=time] { font:inherit; background:var(--bg); color:var(--text); border:1px solid var(--line); border-radius:10px; padding:6px 8px; }
+
+  /* ---------- migas */
+  .crumbs { display:flex; flex-wrap:wrap; gap:2px; align-items:center; margin:0 auto 14px; max-width:860px; color:var(--muted); font-size:15px; }
+  .crumbs button { border:0; background:none; color:var(--muted); padding:4px 8px; border-radius:8px; }
+  .crumbs button:last-child { color:var(--text); font-weight:700; }
+  .crumbs button:hover { background:var(--bg-2); color:var(--accent); }
+
+  /* ---------- cruz de opciones */
+  .cross { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1.05fr) minmax(0,1fr); grid-template-rows:repeat(3,minmax(128px,auto)); gap:14px; max-width:860px; margin:0 auto; }
+  .opt { position:relative; overflow:hidden; isolation:isolate; border:2px solid var(--line); background:var(--panel); border-radius:var(--radius);
+         padding:18px 14px; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; gap:6px;
+         box-shadow:var(--shadow); transition:transform .18s ease, border-color .18s, background .18s; }
+  .opt .lbl { font-size:22px; font-weight:700; line-height:1.2; text-wrap:balance; overflow-wrap:anywhere; hyphens:auto; }
+  .opt:hover:not(:disabled) { border-color:var(--accent); }
+  .opt:disabled { opacity:.38; border-style:dashed; box-shadow:none; background:transparent; cursor:default; }
+  .opt .dir { position:absolute; top:10px; left:12px; width:28px; height:28px; border-radius:9px; display:grid; place-items:center;
+              font-size:15px; font-weight:700; background:var(--bg-2); color:var(--muted); }
+  .opt .tags { position:absolute; top:10px; right:12px; display:flex; gap:4px; }
+  .opt .sub { font-size:13px; color:var(--muted); }
+  .opt.k-menu .sub::after { content:""; }
+  .opt.k-more { background:var(--bg); border-style:dashed; }
+  .opt.k-more .lbl { font-size:19px; color:var(--muted); }
+  .opt.k-ia { border-color:color-mix(in srgb, var(--ia) 35%, var(--line)); }
+  .opt.k-phrase .lbl, .opt.k-leaf .lbl { font-size:23px; }
+  .opt.hl { border-color:var(--accent); transform:scale(1.03); box-shadow:0 0 0 6px color-mix(in srgb, var(--accent) 18%, transparent), var(--shadow); }
+  .opt.hl .dir { background:var(--accent); color:var(--accent-ink); }
+  .opt.pending { border-color:var(--crit); background:var(--crit-soft); animation:nudge 1s ease-in-out infinite; }
+  @keyframes nudge { 50% { box-shadow:0 0 0 8px color-mix(in srgb, var(--crit) 22%, transparent); } }
+  .opt .prog { position:absolute; inset:0 auto 0 0; width:0; background:var(--accent-soft); z-index:-1; transition:width .12s linear; }
   .up { grid-column:2; grid-row:1; } .down { grid-column:2; grid-row:3; }
   .left { grid-column:1; grid-row:2; } .right { grid-column:3; grid-row:2; }
-  .center { grid-column:2; grid-row:2; display:flex; flex-direction:column; align-items:center; justify-content:center;
-            text-align:center; color:var(--muted); font-size:13px; gap:8px; padding:6px; }
-  .center strong { color:var(--text); font-size:16px; }
-  .tag { display:inline-block; font-size:11px; font-weight:700; padding:1px 6px; border-radius:6px; border:1px solid currentColor; }
-  .tag.ia { color:var(--ia); } .tag.crit { color:var(--crit); } .tag.aj { color:var(--aj); }
-  .banner { margin:14px auto 0; max-width:720px; min-height:48px; padding:12px 16px; border-radius:10px;
-            background:var(--accent-soft); display:flex; align-items:center; gap:10px; }
-  .banner.warn { background:color-mix(in srgb, var(--crit) 14%, transparent); }
-  .hint { max-width:720px; margin:10px auto 0; font-size:13px; color:var(--muted); }
-  kbd { border:1px solid var(--line); border-bottom-width:2px; border-radius:4px; padding:0 5px; font:12px monospace; }
-  label.f { display:block; font-size:12px; color:var(--muted); margin:10px 0 3px; }
-  input[type=text] { width:100%; font:inherit; color:inherit; background:var(--bg); border:1px solid var(--line);
-                     border-radius:8px; padding:7px 10px; }
-  input[type=text]:focus { outline:2px solid var(--accent); border-color:transparent; }
-  .flags { display:flex; gap:14px; margin-top:8px; flex-wrap:wrap; }
-  .flags label { display:flex; gap:5px; align-items:center; }
-  .row { display:grid; grid-template-columns:28px 1fr auto; gap:6px; align-items:center; margin-bottom:6px; }
-  .row .d { text-align:center; color:var(--muted); font-size:18px; }
-  .row .acts { display:flex; gap:3px; }
-  .row .acts .btn { padding:4px 8px; }
-  .count { color:var(--muted); font-weight:400; text-transform:none; letter-spacing:0; }
-  .count.bad { color:var(--crit); }
-  details.outline { margin-top:16px; border-top:1px solid var(--line); padding-top:12px; }
-  details.outline summary { cursor:pointer; color:var(--muted); font-size:13px; }
-  .outline ul { list-style:none; margin:4px 0 0; padding-left:16px; border-left:1px dashed var(--line); }
-  .outline > ul { border:0; padding-left:0; }
-  .outline li > div { padding:1px 0; }
-  .outline a { color:var(--text); cursor:pointer; text-decoration:none; }
-  .outline a:hover { color:var(--accent); text-decoration:underline; }
-  .outline a.cur { color:var(--accent); font-weight:700; }
-  textarea { width:100%; font:inherit; color:inherit; background:var(--bg); border:1px solid var(--line);
-             border-radius:8px; padding:7px 10px; resize:vertical; }
-  textarea:focus { outline:2px solid var(--accent); border-color:transparent; }
-  .tools { display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin-bottom:12px; font-size:13px; }
-  .tools input[type=text] { width:230px; } .tools input[type=time] { font:inherit; background:var(--bg); color:inherit;
-        border:1px solid var(--line); border-radius:8px; padding:5px 8px; }
-  .ia-box { margin-top:12px; padding:12px; border:1px dashed var(--ia); border-radius:10px; }
-  .ia-box h3 { margin:0 0 4px; font-size:13px; color:var(--ia); }
-  .result { margin-top:8px; font-size:13px; }
-  .result ol { margin:4px 0 0; padding-left:20px; }
+  .center { grid-column:2; grid-row:2; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center;
+            color:var(--muted); font-size:13px; gap:10px; padding:10px; border-radius:var(--radius);
+            background:radial-gradient(circle at 50% 45%, var(--accent-soft), transparent 70%); }
+  .center strong { color:var(--text); font:600 26px/1.15 var(--display); text-wrap:balance; }
+  .center .btn { border-radius:999px; }
+
+  .tag { display:inline-block; font-size:11px; font-weight:700; padding:2px 7px; border-radius:999px; line-height:1.3; }
+  .tag.IA { color:var(--ia); background:var(--ia-soft); } .tag.crit, .tag.\! { color:var(--crit); background:var(--crit-soft); }
+  .tag.AJ { color:var(--aj); background:var(--bg-2); }
+
+  /* ---------- frase dicha */
+  .banner { margin:20px auto 0; max-width:860px; min-height:64px; padding:16px 22px 16px 58px; border-radius:var(--radius); position:relative;
+            background:var(--accent-soft); color:var(--text); font-size:19px; font-weight:700; display:flex; align-items:center; }
+  .banner::before { content:""; position:absolute; left:20px; top:50%; width:24px; height:24px; transform:translateY(-50%); background:var(--accent);
+            -webkit-mask:var(--speaker) center/contain no-repeat; mask:var(--speaker) center/contain no-repeat; }
+  .banner:empty::after { content:"Lo que se diga aparecerá aquí"; color:var(--muted); font-weight:400; font-size:16px; }
+  .banner.warn { background:var(--crit-soft); } .banner.warn::before { background:var(--crit); }
+  :root { --speaker:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M11 5 6 9H2v6h4l5 4V5z'/%3E%3Cpath d='M15.5 8.5a5 5 0 0 1 0 7M19 5a10 10 0 0 1 0 14'/%3E%3C/svg%3E"); }
+  .hint { max-width:860px; margin:14px auto 0; font-size:13px; color:var(--muted); text-align:center; }
+  kbd { border:1px solid var(--line); border-bottom-width:2px; border-radius:6px; padding:0 6px; font:12px ui-monospace,monospace; background:var(--panel); }
+
+  /* ---------- editor */
+  label.f { display:block; font-size:13px; color:var(--muted); margin:12px 0 4px; font-weight:700; }
+  input[type=text], textarea { width:100%; font:inherit; font-size:15px; color:inherit; background:var(--bg); border:1px solid var(--line); border-radius:12px; padding:9px 12px; }
+  textarea { resize:vertical; }
+  input[type=text]:focus, textarea:focus { outline:2px solid var(--accent); border-color:transparent; }
+  .flags { display:flex; gap:8px; margin-top:12px; flex-wrap:wrap; }
+  .flags label { display:flex; gap:7px; align-items:center; font-size:14px; padding:6px 12px; border:1px solid var(--line); border-radius:999px; cursor:pointer; }
+  .flags label:has(input:checked) { border-color:var(--accent); background:var(--accent-soft); }
+  .ia-box { margin-top:14px; padding:14px; background:var(--ia-soft); border-radius:16px; }
+  .ia-box h3 { margin:0 0 4px; font-size:14px; color:var(--ia); }
+  .ia-box textarea { background:var(--panel); }
+  .result { margin-top:10px; font-size:14px; } .result ol { margin:6px 0 0; padding-left:22px; }
   .meta { color:var(--muted); font-size:12px; }
-  .hist { margin-top:16px; border-top:1px solid var(--line); padding-top:12px; font-size:13px; }
-  .hist ul { margin:6px 0; padding-left:18px; color:var(--muted); max-height:140px; overflow:auto; }
-  #status { font-size:13px; color:var(--muted); }
-  #status.dirty { color:var(--crit); }
+  .row { display:grid; grid-template-columns:32px 1fr auto; gap:8px; align-items:center; margin-bottom:8px; }
+  .row .d { text-align:center; color:var(--muted); font-size:15px; font-weight:700; width:28px; height:28px; border-radius:9px; background:var(--bg-2); display:grid; place-items:center; }
+  .row .acts { display:flex; gap:4px; } .row .acts .btn { padding:6px 9px; font-size:13px; }
+  .count { color:var(--muted); font-weight:400; text-transform:none; letter-spacing:0; } .count.bad { color:var(--crit); }
+  .hist { margin-top:20px; border-top:1px solid var(--line); padding-top:14px; font-size:14px; }
+  .hist ul { margin:8px 0; padding-left:18px; color:var(--muted); max-height:150px; overflow:auto; }
+  details.outline { margin-top:18px; border-top:1px solid var(--line); padding-top:14px; }
+  details.outline summary { cursor:pointer; color:var(--muted); font-size:14px; font-weight:700; }
+  .outline ul { list-style:none; margin:4px 0 0; padding-left:16px; border-left:1px dashed var(--line); }
+  .outline > div > ul { border:0; padding-left:0; }
+  .outline a { color:var(--text); cursor:pointer; } .outline a:hover { color:var(--accent); text-decoration:underline; }
+  .outline a.cur { color:var(--accent); font-weight:700; }
+
+  /* ---------- modo usuario: solo la cruz, a pantalla completa */
+  body[data-mode=user] main { grid-template-columns:1fr; max-width:1200px; margin:0 auto; }
+  body[data-mode=user] #editor, body[data-mode=user] .tools, body[data-mode=user] .caretaker { display:none; }
+  body[data-mode=user] section.panel.stage { background:transparent; border:0; box-shadow:none; padding:0; }
+  body[data-mode=user] .live { position:absolute; top:14px; right:24px; margin:0; z-index:5; }
+  body[data-mode=user] .live .chips { justify-content:flex-end; }
+  body[data-mode=user] .live .chip:not(.key) { display:none; }
+  body[data-mode=user] #recal { background:var(--panel); box-shadow:var(--shadow); }
+  body[data-mode=user] .live .chip { background:var(--panel); box-shadow:var(--shadow); }
+  body[data-mode=user] .cross { max-width:1100px; grid-template-rows:repeat(3,minmax(clamp(130px,22vh,240px),auto)); gap:18px; }
+  body[data-mode=user] .opt .lbl { font-size:clamp(24px,2.6vw,36px); }
+  body[data-mode=user] .center strong { font-size:clamp(26px,2.8vw,40px); }
+  body[data-mode=user] .banner { max-width:1100px; font-size:clamp(20px,2vw,28px); min-height:80px; }
+  body[data-mode=user] .crumbs, body[data-mode=user] .hint { max-width:1100px; }
+  @media (max-width:700px) {
+    header { padding:12px 16px; } main { padding:4px 16px 16px; }
+    body[data-mode] .cross { gap:8px; grid-template-rows:repeat(3,minmax(96px,auto)); }
+    .opt { padding:30px 6px 12px; } body[data-mode] .opt .lbl { font-size:17px; } body[data-mode] .center strong { font-size:19px; }
+    body[data-mode] .banner { font-size:17px; } body[data-mode=user] main { padding-bottom:16px; }
+    body[data-mode=user] .live { display:none; }
+  }
+  @media (prefers-reduced-motion: reduce) { * { animation:none !important; transition:none !important; } }
 </style>
 </head>
-<body>
+<body data-mode="user">
 <header>
-  <h1>Melior · árbol de opciones</h1>
-  <label style="display:flex;gap:6px;align-items:center;font-size:13px"><input type="checkbox" id="voice"> Voz del navegador</label>
-  <span id="status">Cargando…</span>
-  <button class="btn primary" id="save">Guardar</button>
+  <div class="brand">
+    <span class="logo" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/><path d="M9 11h.01M12 11h.01M15 11h.01"/></svg></span>
+    <h1>Melior</h1>
+  </div>
+  <label class="opts-voice caretaker"><input type="checkbox" id="voice"> Voz del navegador si falla ElevenLabs</label>
+  <span id="status" class="caretaker">Cargando…</span>
+  <button class="btn primary caretaker" id="save">Guardar</button>
 </header>
 <main>
-  <section>
-    <h2>Simulador (4 direcciones)</h2>
+  <section class="panel stage">
+    <div class="live">
+      <div class="chips">
+        <span class="chip key"><span class="dot" id="d-cam"></span><span id="t-cam">Cámara…</span></span>
+        <span class="chip key"><span class="dot" id="d-cal"></span><span id="t-cal">Calibración</span></span>
+        <span class="chip"><span class="dot" id="d-voice"></span><span id="t-voice">Voz</span></span>
+        <span class="chip"><span class="dot" id="d-llm"></span><span id="t-llm">Gemma</span></span>
+        <button class="btn" id="recal">Recalibrar · mira al frente</button>
+      </div>
+    </div>
     <div class="tools">
       <input type="text" id="heard" placeholder="Lo último que se le dijo (para nodos IA)">
       <label>Hora simulada <input type="time" id="clock"></label>
@@ -106,11 +196,12 @@
     </div>
     <div class="crumbs" id="crumbs"></div>
     <div class="cross" id="cross"></div>
-    <div class="banner" id="banner"></div>
-    <p class="hint"><kbd>↑</kbd> <kbd>↓</kbd> <kbd>←</kbd> <kbd>→</kbd> eligen opción · <kbd>Esc</kbd> o <kbd>Backspace</kbd> vuelve atrás ·
-      en una opción crítica <span class="tag crit">!</span> hay que repetir la misma flecha para confirmar.</p>
+    <div class="banner" id="banner" aria-live="polite"></div>
+    <p class="hint">Apunta con la cabeza y mantén quieto para elegir · <b>parpadeo largo</b> = atrás · sin cámara:
+      <kbd>↑</kbd> <kbd>↓</kbd> <kbd>←</kbd> <kbd>→</kbd> eligen, <kbd>Esc</kbd> vuelve.
+      En una opción <span class="tag crit">!</span> repite la dirección para confirmar.</p>
   </section>
-  <section>
+  <section class="panel" id="editor">
     <h2>Editar este menú <span class="count" id="count"></span></h2>
     <label class="f">Nombre del menú actual</label>
     <input type="text" id="f-label">
@@ -119,9 +210,9 @@
     <label class="f">Nota</label>
     <input type="text" id="f-note">
     <div class="flags">
-      <label><input type="checkbox" id="f-ia"> <span class="tag ia">IA</span> Gemma genera aquí</label>
+      <label><input type="checkbox" id="f-ia"> <span class="tag IA">IA</span> Gemma genera aquí</label>
       <label><input type="checkbox" id="f-crit"> <span class="tag crit">!</span> Crítico</label>
-      <label><input type="checkbox" id="f-aj"> <span class="tag aj">AJ</span> Ajuste</label>
+      <label><input type="checkbox" id="f-aj"> <span class="tag AJ">AJ</span> Ajuste</label>
     </div>
     <div class="ia-box" id="iabox" hidden>
       <h3>Gemma en este nodo</h3>
@@ -132,276 +223,210 @@
       <p style="margin:10px 0 0"><button class="btn" id="test">Probar con Gemma</button></p>
       <div class="result" id="result"></div>
     </div>
-    <h2 style="margin-top:20px">Opciones <span class="count" id="count2"></span></h2>
+    <h2 style="margin-top:24px">Opciones <span class="count" id="count2"></span></h2>
     <div id="rows"></div>
     <button class="btn" id="add">+ Añadir opción</button>
     <div class="hist"><b>Historial (aprendizaje)</b> <span class="meta" id="histcount"></span>
       <ul id="histlist"></ul>
       <button class="btn" id="histclear">Borrar historial</button>
-      <div class="meta" style="margin-top:6px">Se guarda solo en este equipo (data/user_history.jsonl, fuera de git). Con el endpoint compartido no uses datos reales de salud.</div>
+      <div class="meta" style="margin-top:6px">Solo en este equipo (data/user_history.jsonl, fuera de git). Con el endpoint compartido no uses datos reales de salud.</div>
     </div>
     <details class="outline"><summary>Ver árbol completo</summary><div id="outline"></div></details>
   </section>
 </main>
 <script>
-const DIRS = [
-  {key:"ArrowUp", sym:"↑", cls:"up"},
-  {key:"ArrowDown", sym:"↓", cls:"down"},
-  {key:"ArrowLeft", sym:"←", cls:"left"},
-  {key:"ArrowRight", sym:"→", cls:"right"},
-];
-const MAX = 4;
-let tree, path = [], pending = null, dirty = false, dyn = null, busy = false;
+const MAX = 4, KEYS = {ArrowUp: "up", ArrowDown: "down", ArrowLeft: "left", ArrowRight: "right"};
+const ARROWS = ["↑", "↓", "←", "→"], DIRS = ["up", "down", "left", "right"];
+let tree, state = null, dirty = false, saveTimer = null, edPath = null, lastCrossKey = "", lastSpeech = null;
 
 const $ = id => document.getElementById(id);
-const nodeAt = p => p.reduce((n, i) => n.children[i], tree);
-const cur = () => nodeAt(path);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const post = async (url, body) => (await fetch(url, {method: "POST", body: JSON.stringify(body || {})})).json();
 const has = (n, f) => (n.flags || []).includes(f);
 const kids = n => n.children || [];
+const nodeAt = p => { let n = tree; for (const i of p) n = n.children[i]; return n; };
+const safeNodeAt = p => { try { return nodeAt(p); } catch (e) { return tree; } };
+const pathLabels = p => { let n = tree; return p.map(i => (n = n.children[i]).label); };
+const tagHtml = ts => ts.map(t => `<span class="tag ${t}">${t}</span>`).join(" ");
 
-function setFlag(n, f, on) {
-  const s = new Set(n.flags || []);
-  on ? s.add(f) : s.delete(f);
-  if (s.size) n.flags = [...s]; else delete n.flags;
-}
-function markDirty() { dirty = true; $("status").textContent = "Cambios sin guardar"; $("status").className = "dirty"; }
-function tags(n) {
-  return (has(n,"ia") ? '<span class="tag ia">IA</span> ' : "") + (has(n,"!") ? '<span class="tag crit">!</span> ' : "") +
-         (has(n,"aj") ? '<span class="tag aj">AJ</span> ' : "");
-}
-const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
-
-const post = async (url, body) => (await fetch(url, {method: "POST", body: JSON.stringify(body)})).json();
-function pathLabels(p) { let n = tree; return p.map(i => (n = n.children[i]).label); }
-// Pantalla generada: 3 frases en ↑ ← → y «Más opciones» fijo en ↓ (índice 1).
-const PHRASE_SLOTS = [0, 2, 3], PAGE = 3;
-const dynDone = () => dyn.noMore && !dyn.queue.length && !dyn.inflight;
-function dynSlots() {
-  const slots = [null, {more: true, label: dynDone() ? "Sin más opciones" : "Más opciones", disabled: dynDone()}, null, null];
-  PHRASE_SLOTS.forEach((slot, k) => { if (dyn.options[k]) slots[slot] = {label: dyn.options[k], dynamic: true}; });
-  return slots;
-}
-const clockVal = () => $("clock").value || "";
-const fallbackOf = n => n.fallback || [];
-
-function renderCrumbs() {
-  const parts = [];
-  let n = tree;
-  parts.push(`<button data-p="-1">${esc(tree.label)}</button>`);
-  path.forEach((i, k) => {
-    n = n.children[i];
-    parts.push(`<span>›</span><button data-p="${k}">${esc(n.label)}</button>`);
+// ------------------------------------------------------------------ en vivo
+function renderCross(s) {
+  const key = JSON.stringify([s.title, s.crumbs, s.slots, s.pending, s.busy]);
+  if (key !== lastCrossKey) {
+    lastCrossKey = key;
+    $("crumbs").innerHTML = ["Melior", ...s.crumbs].map((c, k) =>
+      `${k ? "<span>›</span>" : ""}<button data-k="${k}">${esc(c)}</button>`).join("");
+    $("crumbs").querySelectorAll("button").forEach(b => b.onclick = () => post("/api/goto", {path: s.path.slice(0, Number(b.dataset.k))}));
+    $("cross").innerHTML = s.slots.map((sl, i) => `<button class="opt ${sl.dir} k-${sl.kind}" data-i="${i}" ${sl.disabled ? "disabled" : ""}>
+        <span class="prog"></span><span class="dir">${sl.arrow}</span><span class="tags">${tagHtml(sl.tags)}</span>
+        <span class="lbl">${esc(sl.label ?? "—")}</span><span class="sub">${esc(sl.sub)}</span></button>`).join("") +
+      `<div class="center"><strong>${esc(s.title)}</strong>${s.ia ? `<span class="tag IA">IA · ${esc(s.ia.source)}</span>` : ""}
+        <button class="btn" id="back" ${s.crumbs.length ? "" : "disabled"}>← Atrás</button></div>`;
+    $("cross").querySelectorAll(".opt[data-i]").forEach(b =>
+      b.onclick = () => post("/api/gesture", {event_type: "dwell", target_id: DIRS[Number(b.dataset.i)]}));
+    $("back").onclick = () => post("/api/gesture", {event_type: "back"});
+  }
+  $("cross").querySelectorAll(".opt[data-i]").forEach(b => {
+    const i = Number(b.dataset.i);
+    b.classList.toggle("hl", s.highlight === i);
+    b.classList.toggle("pending", s.pending === i);
+    b.querySelector(".prog").style.width = s.highlight === i ? `${Math.round(s.progress * 100)}%` : "0";
   });
-  $("crumbs").innerHTML = parts.join("");
-  $("crumbs").querySelectorAll("button").forEach(b => b.onclick = () => {
-    path = path.slice(0, Number(b.dataset.p) + 1); pending = null; dyn = null; render();
-  });
+  $("banner").className = "banner" + (s.banner.warn ? " warn" : "");
+  if ($("banner").textContent !== s.banner.text) $("banner").textContent = s.banner.text;
 }
 
-function renderCross() {
-  const n = cur();
-  const c = dyn ? dynSlots() : kids(n);
-  let html = "";
-  DIRS.forEach((d, i) => {
-    const ch = c[i];
-    if (!ch || ch.disabled) { html += `<button class="opt ${d.cls}" disabled><span class="dir">${d.sym}</span>${ch ? esc(ch.label) : "—"}</button>`; return; }
-    const sub = ch.more ? "🔄 nuevas, sin repetir" : ch.dynamic ? "🔊 se dice" : kids(ch).length ? `${kids(ch).length} opciones ›` : (has(ch,"ia") ? "Gemma genera" : "🔊 se dice");
-    html += `<button class="opt ${d.cls}${pending === i ? " pending" : ""}" data-i="${i}">
-      <span class="dir">${d.sym}</span>${tags(ch)}<span>${esc(ch.label)}</span><span class="sub">${sub}${ch.note ? " · " + esc(ch.note) : ""}</span></button>`;
-  });
-  html += `<div class="center"><strong>${esc(dyn ? dyn.label : n.label)}</strong>${dyn ? `<span class="tag ia">IA · ${dyn.source}</span>` : ""}
-    <button class="btn" id="back" ${path.length || dyn ? "" : "disabled"}>← Atrás</button>
-    <button class="btn" id="home" ${path.length || dyn ? "" : "disabled"}>Inicio</button></div>`;
-  $("cross").innerHTML = html;
-  $("cross").querySelectorAll(".opt[data-i]").forEach(b => b.onclick = () => choose(Number(b.dataset.i)));
-  $("back").onclick = back; $("home").onclick = () => { path = []; pending = null; dyn = null; render(); };
+function renderLive(s) {
+  const l = s.live;
+  const cam = {running: ["ok", s.live.face ? `Cámara activa · ${l.fps} fps` : "Cámara activa · no veo tu cara"],
+               starting: ["wait", "Cámara arrancando…"], unavailable: ["bad", "Sin cámara (usa teclado)"],
+               error: ["bad", "Cámara con error"], stopped: ["", "Cámara apagada"]}[l.state] || ["", l.state];
+  $("d-cam").className = "dot " + (l.state === "running" && !l.face ? "wait" : cam[0]);
+  $("t-cam").textContent = cam[1]; $("t-cam").title = l.error || "";
+  const want = l.state === "running";
+  $("d-cal").className = "dot " + (l.calibrated ? "ok" : want ? "wait" : "");
+  $("t-cal").textContent = l.calibrated ? "Calibrado" : want ? "Calibrando… mira al frente" : "Sin calibrar";
+  $("d-voice").className = "dot " + (s.voice.configured ? "ok" : "bad");
+  $("t-voice").textContent = s.voice.configured ? "ElevenLabs configurado" : "ElevenLabs sin clave (.env)";
+  $("recal").disabled = !want;
 }
 
-function banner(text, warn) {
-  $("banner").className = "banner" + (warn ? " warn" : "");
-  $("banner").innerHTML = text;
+async function onSpeech(sp) {
+  if (lastSpeech === null) { lastSpeech = sp.id; return; }  // no hablar lo que ya se dijo antes de abrir la página
+  if (sp.id === lastSpeech) return;
+  lastSpeech = sp.id;
+  const r = await fetch("/api/audio?text=" + encodeURIComponent(sp.text));
+  if (r.status === 200) { new Audio(URL.createObjectURL(await r.blob())).play().catch(() => {}); return; }
+  const why = decodeURIComponent(r.headers.get("X-Voice-Reason") || "");
+  $("status").textContent = "Voz: " + why; $("status").className = "dirty";
+  if ($("voice").checked && "speechSynthesis" in window) {
+    const u = new SpeechSynthesisUtterance(sp.text); u.lang = "es-ES"; speechSynthesis.cancel(); speechSynthesis.speak(u);
+  }
 }
 
-// Siempre la misma voz (ElevenLabs, vía el servidor); sin voz del navegador de reserva.
-let voiceAudio = null;
-async function playVoice(text) {
+async function poll() {
   try {
-    const r = await fetch("/api/speak", {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({text})});
-    if (!r.ok) throw new Error((await r.json()).error);
-    if (voiceAudio) voiceAudio.pause();
-    voiceAudio = new Audio(URL.createObjectURL(await r.blob()));
-    voiceAudio.play();
-  } catch (e) { console.warn("Sin voz:", e.message); banner(`🔇 <b>${esc(text)}</b> (sin audio)`); }
+    const s = await (await fetch("/api/state")).json();
+    state = s;
+    renderCross(s); renderLive(s); onSpeech(s.speech);
+    const key = JSON.stringify(s.path);
+    if (key !== edPath) { edPath = key; renderEditor(); renderOutline(); }
+    const c = s.context;
+    if (document.activeElement !== $("heard") && $("heard").value !== c.heard) $("heard").value = c.heard;
+  } catch (e) { $("banner").textContent = "Sin conexión con el servidor local."; }
+  setTimeout(poll, 120);
 }
 
-function speak(text, recordPath) {
-  banner(`🔊 <b>${esc(text)}</b>`);
-  if ($("voice").checked) playVoice(text);
-  post("/api/choice", {path: recordPath, text, time: clockVal()}).then(loadHistory);
-  setTimeout(() => { if (path.length || dyn) { path = []; dyn = null; render(); } }, 1800);
-  renderCross();
-}
+const sendGesture = (event_type, target_id) => post("/api/gesture", {event_type, target_id});
+document.addEventListener("keydown", e => {
+  if (e.target.matches("input, textarea")) return;
+  if (KEYS[e.key]) { e.preventDefault(); sendGesture("dwell", KEYS[e.key]); }
+  else if (e.key === "Escape" || e.key === "Backspace") { e.preventDefault(); sendGesture("back"); }
+});
+const sendContext = () => post("/api/context", {heard: $("heard").value, clock: $("clock").value, use_history: $("usehist").checked});
+["heard", "clock", "usehist"].forEach(id => $(id).addEventListener("input", sendContext));
+$("recal").onclick = () => post("/api/recalibrate");
 
-async function askGemma(node, labels, exclude = []) {
-  return post("/api/suggest", {path: labels, prompt: node.ia_prompt || node.label, fallback: fallbackOf(node), exclude,
-                               heard: $("heard").value, time: clockVal(), use_history: $("usehist").checked});
-}
-// Cada llamada trae 6 ordenadas: se enseñan 3 y las otras 3 quedan en cola. Al enseñar la última
-// tanda en cola se lanza en segundo plano otra llamada que excluye todo lo ya generado.
-function showPage() { dyn.options = dyn.queue.splice(0, PAGE); dyn.page++; prefetch(); }
-function prefetch() {
-  const mine = dyn;
-  if (mine.inflight || mine.noMore || mine.queue.length >= PAGE) return;
-  mine.inflight = askGemma(mine.node, mine.labels, mine.generated).then(r => {
-    if (!r.options.length) mine.noMore = true;
-    else { mine.queue.push(...r.options); mine.generated.push(...r.options); }
-  }).catch(() => { mine.noMore = true; }).finally(() => { mine.inflight = null; if (dyn === mine) renderCross(); });
-}
-async function moreOptions() {
-  if (busy) return;
-  const mine = dyn;
-  if (!mine.queue.length && mine.inflight) { busy = true; banner("Buscando otras opciones…"); await mine.inflight; busy = false; }
-  if (dyn !== mine) return;
-  if (!mine.queue.length) { renderCross(); banner("Ya no quedan opciones nuevas. Vuelve atrás para elegir otra cosa.", true); return; }
-  showPage();
-  banner(`Tanda ${mine.page} · ${mine.queue.length} ya preparadas${mine.inflight ? " · generando más…" : ""}`);
-  renderCross();
-}
-function sourceNote(r) {
-  const m = {llm: "Gemma", mixed: "Gemma + reserva", fallback: "Solo reserva", empty: "Sin opciones"}[r.source];
-  return `${m} · ${r.ms} ms · ${esc(r.context.comida)}${r.reason ? ` · <span style="color:var(--crit)">${esc(r.reason)}</span>` : ""}`;
-}
+// Por defecto solo la vista del usuario; ?mode=care muestra el editor del árbol.
+if (new URLSearchParams(location.search).get("mode") === "care") document.body.dataset.mode = "care";
 
-async function choose(i) {
-  if (busy) return;
-  if (dyn) {
-    if (i === 1) return moreOptions();
-    const t = dyn.options[PHRASE_SLOTS.indexOf(i)];
-    if (t) speak(t, dyn.labels);
-    return;
-  }
-  const ch = kids(cur())[i];
-  if (!ch) return;
-  if (kids(ch).length) { path.push(i); pending = null; render(); banner(`Menú <b>${esc(ch.label)}</b>`); return; }
-  if (has(ch, "ia")) {
-    busy = true; pending = null; banner(`${tags(ch)}Preguntando a Gemma para <b>${esc(ch.label)}</b>…`);
-    const labels = [...pathLabels(path), ch.label];
-    try {
-      const r = await askGemma(ch, labels);
-      dyn = {label: ch.label, node: ch, labels, queue: [...r.options], generated: [...r.options], options: [], page: 0, noMore: !r.options.length, inflight: null};
-      showPage();
-      banner(sourceNote(r), r.source === "fallback");
-    } catch (e) { banner("No se pudo contactar con el servidor local.", true); }
-    busy = false; renderCross(); return;
-  }
-  if (has(ch, "!") && pending !== i) {
-    pending = i; renderCross();
-    banner(`<b>Opción crítica:</b> «${esc(ch.say || ch.label)}». Repite la misma flecha para confirmar o <kbd>Esc</kbd> para cancelar.`, true);
-    return;
-  }
-  pending = null;
-  speak(ch.say || ch.label, [...pathLabels(path), ch.label]);
+// ------------------------------------------------------------------ editor
+const cur = () => safeNodeAt(state ? state.path : []);
+function setFlag(n, f, on) { const s = new Set(n.flags || []); on ? s.add(f) : s.delete(f); if (s.size) n.flags = [...s]; else delete n.flags; }
+function markDirty() {
+  dirty = true; $("status").textContent = "Cambios sin guardar…"; $("status").className = "dirty";
+  clearTimeout(saveTimer); saveTimer = setTimeout(save, 700);
 }
-function back() {
-  if (pending !== null) { pending = null; renderCross(); banner("Cancelado."); return; }
-  if (dyn) { dyn = null; renderCross(); banner("Atrás."); return; }
-  if (path.length) { path.pop(); render(); banner("Atrás."); }
+async function save() {
+  clearTimeout(saveTimer);
+  const r = await fetch("/api/tree", {method: "POST", body: JSON.stringify(tree)});
+  if (r.ok) { dirty = false; $("status").textContent = "Guardado en arbol.json y aplicado"; $("status").className = ""; lastCrossKey = ""; }
+  else { const e = await r.json(); $("status").textContent = "No se pudo guardar: " + e.error; $("status").className = "dirty"; }
 }
+$("save").onclick = save;
 
 function renderEditor() {
   const n = cur(), c = kids(n);
   $("f-label").value = n.label; $("f-say").value = n.say || ""; $("f-note").value = n.note || "";
-  $("f-ia").checked = has(n,"ia"); $("f-crit").checked = has(n,"!"); $("f-aj").checked = has(n,"aj");
+  $("f-ia").checked = has(n, "ia"); $("f-crit").checked = has(n, "!"); $("f-aj").checked = has(n, "aj");
   $("count").textContent = $("count2").textContent = `${c.length}/${MAX}`;
-  $("count").className = $("count2").className = "count" + (c.length > MAX ? " bad" : "");
   $("add").disabled = c.length >= MAX;
   $("iabox").hidden = !has(n, "ia");
-  $("f-prompt").value = n.ia_prompt || ""; $("f-fallback").value = fallbackOf(n).join("\n"); $("result").innerHTML = "";
+  $("f-prompt").value = n.ia_prompt || ""; $("f-fallback").value = (n.fallback || []).join("\n"); $("result").innerHTML = "";
   $("rows").innerHTML = c.map((ch, i) => `
     <div class="row" data-i="${i}">
-      <span class="d">${DIRS[i].sym}</span>
+      <span class="d">${ARROWS[i]}</span>
       <input type="text" value="${esc(ch.label)}" data-act="label">
       <span class="acts">
         <button class="btn" data-act="up" ${i === 0 ? "disabled" : ""} title="Subir en la lista">▲</button>
         <button class="btn" data-act="dn" ${i === c.length - 1 ? "disabled" : ""} title="Bajar en la lista">▼</button>
-        <button class="btn" data-act="go" title="Entrar a editar este menú">Abrir</button>
+        <button class="btn" data-act="go" title="Entrar a este menú">Abrir</button>
         <button class="btn" data-act="del" title="Eliminar">✕</button>
-      </span>
-    </div>`).join("") || '<p style="color:var(--muted);margin:0 0 8px">Sin opciones: esta pantalla es una frase final (se dice en voz alta).</p>';
+      </span></div>`).join("") || '<p style="color:var(--muted);margin:0 0 8px">Sin opciones: esta pantalla es una frase final (se dice en voz alta).</p>';
   $("rows").querySelectorAll(".row").forEach(row => {
     const i = Number(row.dataset.i);
     row.querySelectorAll("[data-act]").forEach(el => {
       const act = el.dataset.act;
-      if (act === "label") el.oninput = () => { c[i].label = el.value; markDirty(); renderCross(); renderOutline(); };
+      if (act === "label") el.oninput = () => { c[i].label = el.value; markDirty(); };
       else el.onclick = () => {
-        if (act === "up" || act === "dn") { const j = act === "up" ? i - 1 : i + 1; [c[i], c[j]] = [c[j], c[i]]; markDirty(); render(); }
-        if (act === "go") { path.push(i); pending = null; dyn = null; render(); }
-        if (act === "del" && confirm(`¿Eliminar «${c[i].label}» y todo lo que cuelga de ahí?`)) { c.splice(i, 1); if (!c.length) delete n.children; markDirty(); render(); }
+        if (act === "up" || act === "dn") { const j = act === "up" ? i - 1 : i + 1; [c[i], c[j]] = [c[j], c[i]]; markDirty(); renderEditor(); }
+        if (act === "go") post("/api/goto", {path: [...state.path, i]});
+        if (act === "del" && confirm(`¿Eliminar «${c[i].label}» y todo lo que cuelga de ahí?`)) { c.splice(i, 1); if (!c.length) delete cur().children; markDirty(); renderEditor(); }
       };
     });
   });
 }
-
 function renderOutline() {
-  const build = (n, p) => {
-    const here = JSON.stringify(p) === JSON.stringify(path);
-    const li = `<div><a data-p='${JSON.stringify(p)}' class="${here ? "cur" : ""}">${esc(n.label)}</a> ${tags(n)}</div>`;
-    return `<li>${li}${kids(n).length ? "<ul>" + kids(n).map((ch, i) => build(ch, [...p, i])).join("") + "</ul>" : ""}</li>`;
-  };
-  $("outline").innerHTML = "<ul>" + build(tree, []) + "</ul>";
-  $("outline").querySelectorAll("a").forEach(a => a.onclick = () => { path = JSON.parse(a.dataset.p); pending = null; dyn = null; render(); });
+  const here = JSON.stringify(state ? state.path : []);
+  const build = (n, p) => `<li><a data-p='${JSON.stringify(p)}' class="${JSON.stringify(p) === here ? "cur" : ""}">${esc(n.label)}</a> ${has(n,"ia") ? '<span class="tag IA">IA</span>' : ""}${has(n,"!") ? '<span class="tag crit">!</span>' : ""}
+    ${kids(n).length ? "<ul>" + kids(n).map((ch, i) => build(ch, [...p, i])).join("") + "</ul>" : ""}</li>`;
+  $("outline").innerHTML = "<div><ul>" + build(tree, []) + "</ul></div>";
+  $("outline").querySelectorAll("a").forEach(a => a.onclick = () => post("/api/goto", {path: JSON.parse(a.dataset.p)}));
 }
 
-function render() { renderCrumbs(); renderCross(); renderEditor(); renderOutline(); }
-
-["label","say","note"].forEach(k => $("f-" + k).oninput = e => {
+["label", "say", "note"].forEach(k => $("f-" + k).oninput = e => {
   const n = cur(), v = e.target.value;
   if (k === "label") { if (v.trim()) n.label = v; } else if (v) n[k] = v; else delete n[k];
-  markDirty(); renderCrumbs(); renderCross(); renderOutline();
+  markDirty();
 });
-[["ia","ia"],["crit","!"],["aj","aj"]].forEach(([id, f]) => $("f-" + id).onchange = e => {
-  setFlag(cur(), f, e.target.checked); markDirty(); renderCross(); renderOutline();
+[["ia", "ia"], ["crit", "!"], ["aj", "aj"]].forEach(([id, f]) => $("f-" + id).onchange = e => {
+  setFlag(cur(), f, e.target.checked); markDirty(); renderEditor();
 });
 $("f-prompt").oninput = e => { const n = cur(); if (e.target.value) n.ia_prompt = e.target.value; else delete n.ia_prompt; markDirty(); };
 $("f-fallback").oninput = e => {
   const n = cur(), v = e.target.value.split("\n").map(x => x.trim()).filter(Boolean).slice(0, 8);
   if (v.length) n.fallback = v; else delete n.fallback; markDirty();
 };
+$("add").onclick = () => {
+  const n = cur(); if (kids(n).length >= MAX) return;
+  (n.children = n.children || []).push({label: "Nueva opción"}); markDirty(); renderEditor();
+  const rows = $("rows").querySelectorAll('input[data-act="label"]'); rows[rows.length - 1].select();
+};
 $("test").onclick = async () => {
   const n = cur(); $("result").textContent = "Preguntando a Gemma…";
-  try {
-    const r = await askGemma(n, pathLabels(path));
-    $("result").innerHTML = `<div class="meta">${sourceNote(r)}</div><ol>${r.options.map(o => `<li>${esc(o)}</li>`).join("")}</ol>`;
-  } catch (e) { $("result").textContent = "No se pudo contactar con el servidor local."; }
+  const r = await post("/api/suggest", {path: pathLabels(state.path), prompt: n.ia_prompt || n.label, fallback: n.fallback || [],
+                                        heard: $("heard").value, time: $("clock").value, use_history: $("usehist").checked});
+  $("result").innerHTML = `<div class="meta">${esc(r.source)} · ${r.ms} ms · ${esc(r.context.comida)}${r.reason ? " · " + esc(r.reason) : ""} — se enseñan de 3 en 3</div>
+    <ol>${r.options.map(o => `<li>${esc(o)}</li>`).join("")}</ol>`;
 };
+
 async function loadHistory() {
   const h = await (await fetch("/api/history")).json();
   $("histcount").textContent = `· ${h.total} elecciones guardadas`;
   $("histlist").innerHTML = h.ultimas.map(r => `<li>${esc(r.text)} <span class="meta">(${esc(r.path.split(" > ").slice(-2).join(" > "))}, ${esc(r.momento)})</span></li>`).join("") || "<li>vacío</li>";
 }
-$("histclear").onclick = async () => { if (confirm("¿Borrar todo el historial?")) { await post("/api/history/clear", {}); loadHistory(); } };
-$("add").onclick = () => {
-  const n = cur(); if (kids(n).length >= MAX) return;
-  (n.children = n.children || []).push({label: "Nueva opción"}); markDirty(); render();
-  const rows = $("rows").querySelectorAll('input[data-act="label"]'); rows[rows.length - 1].select();
-};
-$("save").onclick = async () => {
-  const r = await fetch("/api/tree", {method: "POST", body: JSON.stringify(tree)});
-  if (r.ok) { dirty = false; $("status").textContent = "Guardado en arbol.json"; $("status").className = ""; }
-  else { const e = await r.json(); alert("No se pudo guardar: " + e.error); }
-};
-document.addEventListener("keydown", e => {
-  if (e.target.matches("input, textarea")) return;
-  const i = DIRS.findIndex(d => d.key === e.key);
-  if (i >= 0) { e.preventDefault(); choose(i); }
-  else if (e.key === "Escape" || e.key === "Backspace") { e.preventDefault(); back(); }
-});
+$("histclear").onclick = async () => { if (confirm("¿Borrar todo el historial?")) { await post("/api/history/clear"); loadHistory(); } };
+setInterval(loadHistory, 4000);
+
 window.addEventListener("beforeunload", e => { if (dirty) { e.preventDefault(); e.returnValue = ""; } });
 
-fetch("/api/tree").then(r => r.json()).then(t => {
-  tree = t; $("status").textContent = "Cargado"; render(); loadHistory();
-  banner("Usa las flechas del teclado o haz clic en una opción.");
-});
+(async () => {
+  tree = await (await fetch("/api/tree")).json();
+  const info = await (await fetch("/api/info")).json();
+  $("t-llm").textContent = `Gemma · ${info.llm.replace("http://", "")}`; $("d-llm").className = "dot ok";
+  $("status").textContent = "Cargado";
+  loadHistory(); poll();
+})();
 </script>
 </body>
 </html>
