@@ -98,6 +98,7 @@ Keep these out of the code (environment variables):
 ## Open decisions (to complete)
 
 - [ ] **UI in Python:** desktop window (OpenCV / pygame / Tkinter) or a local web UI served by Python (FastAPI / NiceGUI)?
+- [ ] **Web version: ** not necessary at first
 - [ ] **MVP level:** needs board reordered by Gemma (microphone is out of the MVP).
 - [ ] **First real user / therapist** to validate the interaction.
 - [ ] **Languages:** Spanish first, English later?
