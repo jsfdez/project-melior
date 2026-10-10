@@ -11,6 +11,7 @@ class HeadPose(BaseModel):
 class VisionFrame(BaseModel):
     timestamp: float
     head_pose: HeadPose
+    blink: float = 0.0  # mean eyeBlinkLeft/Right score, 0..1
     landmarks: Optional[List[Any]] = None
 
 

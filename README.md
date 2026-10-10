@@ -106,14 +106,54 @@ claude --model=gemma-4-26b-a4b
 
 ### Interaction
 
-| Gesture | Action |
-|---|---|
-| Turn / tilt the head | Move the cursor or highlight the next option |
-| Hold on an option (~1 s, dwell) | Select it |
-| Nod | Yes / confirm |
-| Shake | No / cancel |
+Current implementation (head + long blink only):
+
+| Gesture | Event | Action |
+|---|---|---|
+| Turn / tilt the head (left, right, up, down) | `move` with `target_id` = `left`/`right`/`up`/`down` | Move the highlight between options |
+| Long blink (~0.6 s) | `back` | Go back / cancel |
+
+Short natural blinks are ignored. Each `move` fires once and the head must return near neutral before the next one (hysteresis + cooldown), so holding the head to one side does not spam events.
+
+Original ideas not implemented yet: dwell to select, nod = yes, shake = no.
 
 Planned: per-user calibration, smoothing (One Euro filter) and an adjustable dead zone and dwell time, because every user has a different range of movement.
+
+## Vision & gestures (how to run)
+
+Code: `src/vision/head_tracker.py` (webcam -> `VisionFrame`), `src/interaction/gesture_engine.py` (`VisionFrame` -> `GestureEvent`), `demo_gestures.py` (live demo), `tests/test_gesture_engine.py`.
+
+```bash
+./setup.sh                                  # Linux/macOS; on Windows: python -m venv venv && venv\Scripts\pip install -r requirements.txt
+python demo_gestures.py                     # Esc quits, R recalibrates the neutral pose
+python -m unittest discover -s tests -t .   # tests (no camera needed)
+```
+
+The first run downloads `models/face_landmarker.task` (~4 MB, git-ignored). Tested with Python 3.14 and `mediapipe` 1.1.0.
+
+Usage from the main loop:
+
+```python
+from src.vision.head_tracker import HeadTracker
+from src.interaction.gesture_engine import GestureEngine
+
+engine = GestureEngine()
+with HeadTracker() as tracker:
+    while True:
+        frame, vision_frame = tracker.read()      # vision_frame is None if no face is visible
+        for event in engine.update(vision_frame):  # GestureEvent("move", "left") / ("back")
+            ...
+```
+
+How it works:
+
+- Head pose (yaw/pitch/roll in degrees) comes from the Face Landmarker facial transformation matrix; the blink score is the mean of the `eyeBlinkLeft`/`eyeBlinkRight` blendshapes.
+- The neutral pose is learned from the first ~1.5 s (keep still, looking at the screen). Gestures are measured relative to it.
+- Tunables are in `GestureConfig` (angle thresholds, blink threshold and duration, cooldowns, smoothing).
+- If left/right or up/down come out inverted on your camera, flip `yaw_sign` / `pitch_sign`.
+- Timestamps passed to `detect_for_video` must always increase; `HeadTracker` guarantees it.
+
+Known to verify with real users: angle thresholds and the long-blink duration.
 
 ## Architecture
 
