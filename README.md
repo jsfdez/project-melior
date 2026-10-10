@@ -41,10 +41,20 @@ chmod +x setup.sh
 ./setup.sh
 ```
 
-After setup, always activate the environment before working:
+### 🚀 Running the Project
+
+To run any script within the project sandbox (ensuring the virtual environment is used), use the `run.sh` utility:
+
 ```bash
-source venv/bin/activate
+chmod +x run.sh
+./run.sh <path_to_your_script.py> [arguments...]
 ```
+
+Example:
+```bash
+./run.sh main.py
+```
+This script will automatically check for and initialize the virtual environment if it doesn't exist.
 
 ## 🛡️ Sandboxing & Isolation
 
