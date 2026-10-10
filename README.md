@@ -163,7 +163,7 @@ Known to verify with real users: angle thresholds and the long-blink duration.
 ## Architecture
 
 - **Head tracking:** MediaPipe Face Landmarker (Python). Head pose from the facial transformation matrix, optional blendshapes (blink, jaw open) as alternative gestures.
-- **Gestures:** a gesture engine separated from the UI that emits simple events (`move`, `dwell`, `nod`, `shake`), so it can be tested without Gemma or ElevenLabs.
+- **Gestures:** a gesture engine separated from the UI that emits simple events (`move`, `dwell`, `nod`, `shake`), so it can be tested without Gemma or ElevenLabs. It uses a One Euro filter for adaptive smoothing.
 - **LLM:** Gemma via the OpenAI-compatible endpoint below. It must answer with a short JSON list of options. It never speaks on behalf of the user without a selection.
 - **Voice:** ElevenLabs text-to-speech (mandatory), with a cache for frequent phrases to cut latency and cost. The API key stays in an environment variable.
 - **Fallback:** a small set of critical phrases (pain, help, emergency) prerecorded or spoken with a local TTS if the network or the LLM is down.
@@ -237,10 +237,10 @@ To enable parallel development, the project is divided into four functional laye
 
 ## Roadmap
 
-1. Prototype: webcam + smoothed cursor + dwell + 6 buttons + ElevenLabs speech (no Gemma).
-2. Add Gemma suggestions through the endpoint above.
-3. Future option: microphone input (speech-to-text) and replies to what the other person says.
-4. Calibration, fallback mode and tests with a real user.
+1. **Refine Gestures:** Implement `nod` (yes) and `shake` (no) for a complete interaction set.
+2. **Robustness & Personalization:** Improve calibration, implement per-user gesture thresholds, and add a robust fallback mode with local TTS/pre-recorded phrases.
+3. **Enhanced Intelligence:** Improve context-aware suggestions from Gemma and explore microphone input for two-way conversation.
+4. **Real-world Validation:** Conduct testing with users/therapists to refine interaction timing and thresholds.
 
 ## Technical Component Overview
 
