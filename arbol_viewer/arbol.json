@@ -120,7 +120,7 @@
                 "ia"
               ],
               "note": "Gemma adapta la comida a la hora",
-              "ia_prompt": "Cuatro comidas o tentempiés concretos y propios de la comida que toca (desayuno, comida, merienda o cena). Redáctalos como petición, por ejemplo 'Quiero una tostada'. No repitas 'Tengo hambre'.",
+              "ia_prompt": "Seis comidas o tentempiés concretos y propios de la comida que toca (desayuno, comida, merienda o cena). Nombra el alimento ('Me apetece una tortilla', 'Quiero un yogur'), nunca 'algo de cena' ni 'un poco de comida'. No repitas 'Tengo hambre'.",
               "fallback": [
                 "Quiero algo ligero",
                 "Quiero fruta",

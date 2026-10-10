@@ -174,9 +174,10 @@ const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":
 const post = async (url, body) => (await fetch(url, {method: "POST", body: JSON.stringify(body)})).json();
 function pathLabels(p) { let n = tree; return p.map(i => (n = n.children[i]).label); }
 // Pantalla generada: 3 frases en ↑ ← → y «Más opciones» fijo en ↓ (índice 1).
-const PHRASE_SLOTS = [0, 2, 3];
+const PHRASE_SLOTS = [0, 2, 3], PAGE = 3;
+const dynDone = () => dyn.noMore && !dyn.queue.length && !dyn.inflight;
 function dynSlots() {
-  const slots = [null, {more: true, label: dyn.exhausted ? "Sin más opciones" : "Más opciones", disabled: dyn.exhausted}, null, null];
+  const slots = [null, {more: true, label: dynDone() ? "Sin más opciones" : "Más opciones", disabled: dynDone()}, null, null];
   PHRASE_SLOTS.forEach((slot, k) => { if (dyn.options[k]) slots[slot] = {label: dyn.options[k], dynamic: true}; });
   return slots;
 }
@@ -245,15 +246,26 @@ async function askGemma(node, labels, exclude = []) {
   return post("/api/suggest", {path: labels, prompt: node.ia_prompt || node.label, fallback: fallbackOf(node), exclude,
                                heard: $("heard").value, time: clockVal(), use_history: $("usehist").checked});
 }
+// Cada llamada trae 6 ordenadas: se enseñan 3 y las otras 3 quedan en cola. Al enseñar la última
+// tanda en cola se lanza en segundo plano otra llamada que excluye todo lo ya generado.
+function showPage() { dyn.options = dyn.queue.splice(0, PAGE); dyn.page++; prefetch(); }
+function prefetch() {
+  const mine = dyn;
+  if (mine.inflight || mine.noMore || mine.queue.length >= PAGE) return;
+  mine.inflight = askGemma(mine.node, mine.labels, mine.generated).then(r => {
+    if (!r.options.length) mine.noMore = true;
+    else { mine.queue.push(...r.options); mine.generated.push(...r.options); }
+  }).catch(() => { mine.noMore = true; }).finally(() => { mine.inflight = null; if (dyn === mine) renderCross(); });
+}
 async function moreOptions() {
-  if (busy || dyn.exhausted) return;
-  busy = true; banner("Buscando otras opciones…");
-  try {
-    const r = await askGemma(dyn.node, dyn.labels, dyn.shown);
-    if (!r.options.length) { dyn.exhausted = true; banner("Ya no quedan opciones nuevas. Vuelve atrás para elegir otra cosa.", true); }
-    else { dyn.options = r.options; dyn.shown.push(...r.options); dyn.source = r.source; dyn.page++; banner(`Tanda ${dyn.page} · ${sourceNote(r)}`, r.source === "fallback"); }
-  } catch (e) { banner("No se pudo contactar con el servidor local.", true); }
-  busy = false; renderCross();
+  if (busy) return;
+  const mine = dyn;
+  if (!mine.queue.length && mine.inflight) { busy = true; banner("Buscando otras opciones…"); await mine.inflight; busy = false; }
+  if (dyn !== mine) return;
+  if (!mine.queue.length) { renderCross(); banner("Ya no quedan opciones nuevas. Vuelve atrás para elegir otra cosa.", true); return; }
+  showPage();
+  banner(`Tanda ${mine.page} · ${mine.queue.length} ya preparadas${mine.inflight ? " · generando más…" : ""}`);
+  renderCross();
 }
 function sourceNote(r) {
   const m = {llm: "Gemma", mixed: "Gemma + reserva", fallback: "Solo reserva", empty: "Sin opciones"}[r.source];
@@ -276,7 +288,8 @@ async function choose(i) {
     const labels = [...pathLabels(path), ch.label];
     try {
       const r = await askGemma(ch, labels);
-      dyn = {label: ch.label, node: ch, options: r.options, shown: [...r.options], source: r.source, labels, page: 1, exhausted: !r.options.length};
+      dyn = {label: ch.label, node: ch, labels, queue: [...r.options], generated: [...r.options], options: [], page: 0, noMore: !r.options.length, inflight: null};
+      showPage();
       banner(sourceNote(r), r.source === "fallback");
     } catch (e) { banner("No se pudo contactar con el servidor local.", true); }
     busy = false; renderCross(); return;
