@@ -56,6 +56,12 @@ class HeadTracker:
         # Use CAP_DSHOW only on Windows
         backend = cv2.CAP_DSHOW if platform.system() == "Windows" else 0
         self._cap = cv2.VideoCapture(camera_index, backend)
+        # Small buffer + MJPG = fresher frames and less latency
+        self._cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
+        self._cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc(*"MJPG"))
+        self._cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
+        self._cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
+        self._cap.set(cv2.CAP_PROP_FPS, 30)
         self._t0 = time.monotonic()
         self._last_ts_ms = -1
 
