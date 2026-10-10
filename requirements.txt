@@ -1,7 +1,7 @@
 # Melior Environment Dependencies
 
-# Core Image Processing (Headless to avoid Qt/X11 issues)
-opencv-python-headless
+# Core Image Processing (Full version for GUI support)
+opencv-python
 mediapipe
 numpy
 

@@ -12,6 +12,8 @@ class VisionFrame(BaseModel):
     timestamp: float
     head_pose: HeadPose
     landmarks: Optional[List[Any]] = None
+    frame: Any
+
 
 
 # --- INTERACTION -> INTERFACE ---
