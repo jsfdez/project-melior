@@ -21,19 +21,47 @@ from typing import List, Optional
 from src.core.contracts import GestureEvent, VisionFrame
 
 
+class OneEuro:
+    """Adaptive low-pass: smooth when still, almost no lag when moving fast."""
+
+    def __init__(self, min_cutoff: float = 1.5, beta: float = 0.08, d_cutoff: float = 1.0):
+        self.min_cutoff, self.beta, self.d_cutoff = min_cutoff, beta, d_cutoff
+        self.x = self.dx = self.t = None
+
+    @staticmethod
+    def _alpha(cutoff: float, dt: float) -> float:
+        tau = 1.0 / (2 * math.pi * cutoff)
+        return 1.0 / (1.0 + tau / dt)
+
+    def __call__(self, x: float, t: float) -> float:
+        if self.x is None:
+            self.x, self.dx, self.t = x, 0.0, t
+            return x
+        dt = max(t - self.t, 1e-3)
+        dx = (x - self.x) / dt
+        self.dx += self._alpha(self.d_cutoff, dt) * (dx - self.dx)
+        cutoff = self.min_cutoff + self.beta * abs(self.dx)
+        self.x += self._alpha(cutoff, dt) * (x - self.x)
+        self.t = t
+        return self.x
+
+
 @dataclass
 class GestureConfig:
-    yaw_deg: float = 6.0           # turn from neutral that counts as "left/right"
-    pitch_deg: float = 5.0         # tilt from neutral that counts as "up/down"
+    yaw_deg: float = 7.0           # turn from neutral that counts as "left/right"
+    pitch_deg: float = 6.0         # tilt from neutral that counts as "up/down"
     exit_ratio: float = 0.6        # below this fraction of the threshold = back at center
-    stable_s: float = 0.35         # direction must hold this long before "move" (filters jitter)
-    dwell_s: float = 1.2           # stillness needed to select
-    still_deg: float = 2.5         # head may drift this much and still count as "still"
+    axis_margin: float = 1.4       # one axis must beat the other by this factor (avoids diagonals)
+    stable_s: float = 0.2          # direction must hold this long before "move" (filters jitter)
+    dwell_s: float = 1.0           # stillness needed to select
+    still_deg: float = 3.0         # head may drift this much and still count as "still"
     blink_threshold: float = 0.5   # eyeBlink score (0..1)
     blink_hold_s: float = 0.6      # a natural blink is ~0.1-0.4 s
     back_cooldown_s: float = 1.5
     neutral_seconds: float = 1.5
-    smoothing: float = 0.3         # EMA factor, 1 = no smoothing (lower = smoother, slower)
+    # One Euro filter: lower min_cutoff = smoother at rest; higher beta = less lag when moving
+    min_cutoff: float = 1.5
+    beta: float = 0.08
     # Flip if directions come out inverted on your camera
     yaw_sign: int = -1
     pitch_sign: int = -1
@@ -49,6 +77,8 @@ class GestureEngine:
         self._t_start: Optional[float] = None
         self.neutral: Optional[tuple] = None  # raw (yaw, pitch)
         self._yaw = self._pitch = None
+        self._fy = OneEuro(self.cfg.min_cutoff, self.cfg.beta)
+        self._fp = OneEuro(self.cfg.min_cutoff, self.cfg.beta)
         self._candidate: Optional[str] = None
         self._candidate_since = 0.0
         self.current: Optional[str] = None     # highlighted direction
@@ -81,9 +111,12 @@ class GestureEngine:
         ry, rp = abs(dy) / (c.yaw_deg * k), abs(dp) / (c.pitch_deg * k)
         if max(ry, rp) < 1.0:
             return None
-        if ry >= rp:
+        # Turning sideways leaks into pitch (and vice versa): require a clear winner
+        if ry >= rp * c.axis_margin:
             return "right" if dy > 0 else "left"
-        return "up" if dp > 0 else "down"
+        if rp >= ry * c.axis_margin:
+            return "up" if dp > 0 else "down"
+        return self.current or self._candidate  # ambiguous diagonal: keep what we had (or nothing)
 
     def update(self, frame: Optional[VisionFrame]) -> List[GestureEvent]:
         c = self.cfg
@@ -103,9 +136,8 @@ class GestureEngine:
                 self._yaw, self._pitch = self.neutral
             return []
 
-        a = c.smoothing
-        self._yaw = yaw if self._yaw is None else a * yaw + (1 - a) * self._yaw
-        self._pitch = pitch if self._pitch is None else a * pitch + (1 - a) * self._pitch
+        self._yaw = self._fy(yaw, t)
+        self._pitch = self._fp(pitch, t)
 
         events: List[GestureEvent] = []
         dy, dp = self.deviation()

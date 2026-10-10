@@ -14,7 +14,7 @@ class Sim:
     """Feeds frames at 20 fps and collects events."""
 
     def __init__(self):
-        self.e = GestureEngine(GestureConfig(smoothing=1.0))
+        self.e = GestureEngine(GestureConfig(min_cutoff=1e4, beta=0.0))  # filter off
         self.t = 0.0
         self.events = []
         while not self.e.calibrated:
@@ -72,9 +72,9 @@ class GestureEngineTest(unittest.TestCase):
     def test_moving_resets_dwell(self):
         s = Sim()
         s.hold(0.6, yaw=10)
-        s.hold(0.8, yaw=10)
+        s.hold(0.4, yaw=10)
         s.hold(0.2, yaw=16)  # drift beyond still_deg restarts the timer
-        s.hold(0.8, yaw=16)
+        s.hold(0.6, yaw=16)
         self.assertNotIn(("dwell", "left"), s.kinds())
 
     def test_short_blink_ignored_long_blink_goes_back(self):

@@ -3,6 +3,7 @@
     python demo_gestures.py [camera_index]
 """
 import sys
+import time
 
 import cv2
 
@@ -20,9 +21,13 @@ def main():
     cam = int(sys.argv[1]) if len(sys.argv) > 1 else 0
     engine = GestureEngine()
     log = []
+    fps, last_t = 0.0, time.monotonic()
     with HeadTracker(cam) as tracker:
         while True:
             frame, vf = tracker.read()
+            now = time.monotonic()
+            fps = 0.9 * fps + 0.1 / max(now - last_t, 1e-3)
+            last_t = now
             if frame is None:
                 print("No camera frame")
                 break
@@ -43,6 +48,7 @@ def main():
                 cv2.rectangle(frame, (10, 75), (210, 95), (80, 80, 80), 1)
                 cv2.rectangle(frame, (10, 75), (10 + int(200 * engine.dwell_progress), 95), GREEN, -1)
             draw_text(frame, f"blink {vf.blink:.2f}" if vf else "No face", 120, RED if not vf else GREEN)
+            draw_text(frame, f"{fps:.0f} fps", 150, YELLOW)
             for i, msg in enumerate(reversed(log)):
                 draw_text(frame, msg, h - 20 - 28 * i, YELLOW)
             cv2.imshow("Melior gestures", frame)
