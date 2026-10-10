@@ -1,0 +1,19 @@
+# Vision & Signal
+opencv-python
+mediapipe
+numpy
+
+# Interaction & Gesture
+pydantic
+
+# Intelligence & Voice
+httpx
+python-dotenv
+
+# Interface (Web option)
+fastapi
+uvicorn
+nicegui
+
+# Interface (Desktop option)
+pygame
