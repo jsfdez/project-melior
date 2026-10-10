@@ -6,6 +6,7 @@ Video never leaves this process.
 import math
 import time
 import urllib.request
+import platform
 from pathlib import Path
 
 import cv2
@@ -15,6 +16,7 @@ from mediapipe.tasks import python as mp_python
 from mediapipe.tasks.python import vision
 
 from src.core.contracts import HeadPose, VisionFrame
+
 
 MODEL_URL = (
     "https://storage.googleapis.com/mediapipe-models/face_landmarker/"
@@ -50,7 +52,9 @@ class HeadTracker:
             output_facial_transformation_matrixes=True,
         )
         self._landmarker = vision.FaceLandmarker.create_from_options(options)
-        backend = cv2.CAP_DSHOW if hasattr(cv2, "CAP_DSHOW") else 0
+
+        # Use CAP_DSHOW only on Windows
+        backend = cv2.CAP_DSHOW if platform.system() == "Windows" else 0
         self._cap = cv2.VideoCapture(camera_index, backend)
         self._t0 = time.monotonic()
         self._last_ts_ms = -1
@@ -71,9 +75,10 @@ class HeadTracker:
         scores = {c.category_name: c.score for c in result.face_blendshapes[0]}
         blink = (scores.get("eyeBlinkLeft", 0.0) + scores.get("eyeBlinkRight", 0.0)) / 2
         return frame, VisionFrame(
-            timestamp=time.monotonic(),
+            timestamp=ts_ms / 1000.0,
             head_pose=pose_from_matrix(result.facial_transformation_matrixes[0]),
             blink=blink,
+            frame=frame
         )
 
     def close(self):

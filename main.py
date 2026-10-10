@@ -1,8 +1,8 @@
 import asyncio
 import queue
-import threading
 from src.core.vision_worker import VisionWorker
 from src.interface.desktop_interface import DesktopApp
+from src.interaction.gesture_engine import GestureEngine
 
 async def main():
     # 1. Initialize communication queue
@@ -12,9 +12,11 @@ async def main():
     worker = VisionWorker(output_queue=vision_queue)
     worker.start()
 
-    # 3. Initialize and run the Desktop Application
-    # We use the Pygame implementation which has its own main loop.
-    app = DesktopApp(input_queue=vision_queue)
+    # 3. Initialize the Gesture Engine
+    gesture_engine = GestureEngine()
+
+    # 4. Initialize and run the Desktop Application
+    app = DesktopApp(input_queue=vision_queue, gesture_engine=gesture_engine)
 
     try:
         print("🚀 Starting Melior Desktop Application (Pygame)...")
@@ -23,7 +25,7 @@ async def main():
     except Exception as e:
         print(f"❌ Error in main loop: {e}")
     finally:
-        # 4. Graceful Shutdown
+        # 5. Graceful Shutdown
         print("🛑 Initiating shutdown sequence...")
         worker.stop()
         worker.join(timeout=5)
