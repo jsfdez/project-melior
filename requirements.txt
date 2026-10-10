@@ -1,5 +1,7 @@
-# Vision & Signal
-opencv-python
+# Melior Environment Dependencies
+
+# Core Image Processing (Headless to avoid Qt/X11 issues)
+opencv-python-headless
 mediapipe
 numpy
 
@@ -10,10 +12,10 @@ pydantic
 httpx
 python-dotenv
 
-# Interface (Web option)
+# Interface (Web-based approach)
 fastapi
 uvicorn
 nicegui
 
-# Interface (Desktop option)
+# Desktop/Alternative (Optional)
 pygame
