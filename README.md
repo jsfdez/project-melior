@@ -106,6 +106,30 @@ Keep these out of the code (environment variables):
 - [ ] **Voice:** generic ElevenLabs voice or a cloned one (needs consent)?
 - [ ] **Repo structure and how to run** (to fill in once the first prototype exists).
 
+## Team Roles & Implementation
+
+To enable parallel development, the project is divided into four functional layers:
+
+### 1. Vision & Signal Specialist (The "Eyes")
+**Focus:** Capturing and stabilizing raw movement data.
+*   **Tasks:** MediaPipe Face Landmarker implementation, head pose calculation, smoothing/filtering (One Euro filter), and user calibration.
+*   **Stack:** OpenCV, MediaPipe, NumPy.
+
+### 2. Interaction & Gesture Engineer (The "Brain")
+**Focus:** Turning raw movement into meaningful intent.
+*   **Tasks:** Gesture engine (move, dwell, nod, shake), application state machine, and gesture timing/dead-zone logic.
+*   **Stack:** Python (asyncio/event loops).
+
+### 3. Intelligence & Voice Integrator (The "Voice & Mind")
+**Focus:** Managing the conversation and audio output.
+*   **Tasks:** Gemma LLM integration, ElevenLabs TTS implementation, phrase caching, and emergency fallback logic.
+*   **Stack:** `httpx`/`requests`, JSON, local caching.
+
+### 4. Interface & UX Developer (The "Face")
+**Focus:** Creating the visual environment for the user.
+*   **Tasks:** UI implementation (Web or Desktop), visual gesture feedback, and suggestion board rendering.
+*   **Stack:** FastAPI/NiceGUI (Web) or Pygame/Tkinter (Desktop).
+
 ## Roadmap
 
 1. Prototype: webcam + smoothed cursor + dwell + 6 buttons + ElevenLabs speech (no Gemma).
