@@ -9,8 +9,6 @@ echo "🚀 Initializing Melior Sandbox..."
 if [ ! -d "venv" ]; then
     echo "📦 Creating virtual environment (venv)..."
     python3 -m venv venv
-else
-    echo "✅ Virtual environment already exists."
 fi
 
 # 2. Activate Environment
@@ -21,9 +19,9 @@ source venv/bin/activate
 echo "🆙 Upgrading pip..."
 pip install --upgrade pip
 
-# 4. Install Dependencies
+# 4. Install/Update Dependencies
 if [ -f "requirements.txt" ]; then
-    echo "📥 Installing dependencies from requirements.txt..."
+    echo "📥 Installing/Updating dependencies from requirements.txt..."
     pip install -r requirements.txt
 else
     echo "❌ Error: requirements.txt not found!"
@@ -33,5 +31,5 @@ fi
 echo "--------------------------------------------------"
 echo "✨ Sandbox setup complete!"
 echo "👉 To enter the sandbox, run: source venv/bin/activate"
-echo "👉 To run the app, run: python main.py"
+echo "👉 To run the app, run: ./run.sh"
 echo "--------------------------------------------------"
