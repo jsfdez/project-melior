@@ -13,6 +13,7 @@ claude --model=gemma-4-26b-a4b
 
 - Use Python
 - Use Gemma-4-26b-a4b
+- Use elevenlabs.io if possible
 
 ## To make LLM requests
 
