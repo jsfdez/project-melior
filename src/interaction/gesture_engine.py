@@ -1,11 +1,20 @@
 """Gesture engine: VisionFrame -> GestureEvent. No UI, no LLM, no TTS.
 
-Events emitted (GestureEvent.event_type):
-  "move"  target_id = "left" | "right" | "up" | "down"  (head turned/tilted away from neutral)
-  "back"  long blink (go back / cancel)
+Interaction model ("point and hold"):
+  1. Move the head slightly away from neutral towards an option.
+  2. Once that direction is stable for `stable_s`, the engine emits "move" (highlight it).
+  3. Keep the head still for `dwell_s` and it emits "dwell" (that option is selected).
+  4. Return to neutral to re-arm. Moving to another direction before the dwell restarts the timer.
+  5. A long blink emits "back".
 
-Neutral pose is learned automatically from the first frames; call `recalibrate()` to redo it.
+Events (GestureEvent.event_type / target_id):
+  "move"   left | right | up | down   highlighted direction changed
+  "dwell"  left | right | up | down   held still long enough: selected
+  "back"   -                          long blink: go back / cancel
+
+Neutral pose is learned from the first frames; call `recalibrate()` to redo it.
 """
+import math
 from dataclasses import dataclass
 from typing import List, Optional
 
@@ -14,18 +23,20 @@ from src.core.contracts import GestureEvent, VisionFrame
 
 @dataclass
 class GestureConfig:
-    yaw_deg: float = 12.0          # turn needed to trigger left/right
-    pitch_deg: float = 9.0         # tilt needed to trigger up/down
-    release_ratio: float = 0.5     # must return below this fraction of the threshold to re-arm
-    move_cooldown_s: float = 0.35
+    yaw_deg: float = 6.0           # turn from neutral that counts as "left/right"
+    pitch_deg: float = 5.0         # tilt from neutral that counts as "up/down"
+    exit_ratio: float = 0.6        # below this fraction of the threshold = back at center
+    stable_s: float = 0.35         # direction must hold this long before "move" (filters jitter)
+    dwell_s: float = 1.2           # stillness needed to select
+    still_deg: float = 2.5         # head may drift this much and still count as "still"
     blink_threshold: float = 0.5   # eyeBlink score (0..1)
     blink_hold_s: float = 0.6      # a natural blink is ~0.1-0.4 s
     back_cooldown_s: float = 1.5
     neutral_seconds: float = 1.5
-    smoothing: float = 0.5         # EMA factor, 1 = no smoothing
-    # Flip if left/right or up/down come out inverted on your camera
-    yaw_sign: int = 1
-    pitch_sign: int = 1
+    smoothing: float = 0.3         # EMA factor, 1 = no smoothing (lower = smoother, slower)
+    # Flip if directions come out inverted on your camera
+    yaw_sign: int = -1
+    pitch_sign: int = -1
 
 
 class GestureEngine:
@@ -36,10 +47,14 @@ class GestureEngine:
     def recalibrate(self):
         self._samples: List[tuple] = []
         self._t_start: Optional[float] = None
-        self.neutral: Optional[tuple] = None  # (yaw, pitch)
+        self.neutral: Optional[tuple] = None  # raw (yaw, pitch)
         self._yaw = self._pitch = None
-        self._armed = True
-        self._last_move = -1e9
+        self._candidate: Optional[str] = None
+        self._candidate_since = 0.0
+        self.current: Optional[str] = None     # highlighted direction
+        self._anchor: Optional[tuple] = None   # (dy, dp) where stillness started
+        self._still_since = 0.0
+        self._selected = False                 # dwell already fired; wait for return to center
         self._blink_since: Optional[float] = None
         self._last_back = -1e9
 
@@ -47,16 +62,33 @@ class GestureEngine:
     def calibrated(self) -> bool:
         return self.neutral is not None
 
+    @property
+    def dwell_progress(self) -> float:
+        """0..1 progress towards selecting the current direction (for UI)."""
+        return self._progress
+
+    _progress = 0.0
+
     def deviation(self) -> tuple:
-        """Smoothed (yaw, pitch) relative to neutral, for overlays/debug."""
+        """Smoothed (yaw, pitch) relative to neutral, sign-corrected, for overlays/debug."""
         if self.neutral is None or self._yaw is None:
             return 0.0, 0.0
         return (self._yaw - self.neutral[0]) * self.cfg.yaw_sign, (self._pitch - self.neutral[1]) * self.cfg.pitch_sign
 
+    def _direction(self, dy: float, dp: float, entering: bool) -> Optional[str]:
+        c = self.cfg
+        k = 1.0 if entering else c.exit_ratio
+        ry, rp = abs(dy) / (c.yaw_deg * k), abs(dp) / (c.pitch_deg * k)
+        if max(ry, rp) < 1.0:
+            return None
+        if ry >= rp:
+            return "right" if dy > 0 else "left"
+        return "up" if dp > 0 else "down"
+
     def update(self, frame: Optional[VisionFrame]) -> List[GestureEvent]:
         c = self.cfg
-        if frame is None:  # face lost: reset transient state
-            self._armed = True
+        if frame is None:  # face lost: drop transient state
+            self._reset_pointing()
             self._blink_since = None
             return []
         t = frame.timestamp
@@ -77,26 +109,58 @@ class GestureEngine:
 
         events: List[GestureEvent] = []
         dy, dp = self.deviation()
-        ry, rp = abs(dy) / c.yaw_deg, abs(dp) / c.pitch_deg  # 1.0 = exactly at threshold
-
-        if max(ry, rp) < c.release_ratio:
-            self._armed = True
-        elif self._armed and max(ry, rp) >= 1.0 and t - self._last_move >= c.move_cooldown_s:
-            if ry >= rp:
-                direction, conf = ("right" if dy > 0 else "left"), ry
-            else:
-                direction, conf = ("up" if dp > 0 else "down"), rp
-            events.append(GestureEvent(event_type="move", target_id=direction, confidence=min(conf / 2, 1.0)))
-            self._armed = False
-            self._last_move = t
-
-        if frame.blink > c.blink_threshold:
-            self._blink_since = self._blink_since if self._blink_since is not None else t
-            if t - self._blink_since >= c.blink_hold_s and t - self._last_back >= c.back_cooldown_s:
-                events.append(GestureEvent(event_type="back", confidence=min(frame.blink, 1.0)))
-                self._last_back = t
-                self._blink_since = None
+        # Hysteresis: easier to stay in a direction than to enter one
+        direction = self._direction(dy, dp, entering=self.current is None and self._candidate is None)
+        if direction is None:
+            self._reset_pointing()
         else:
-            self._blink_since = None
+            events += self._point(direction, dy, dp, t)
 
+        events += self._blink(frame, t)
         return events
+
+    def _reset_pointing(self):
+        self._candidate = None
+        self.current = None
+        self._anchor = None
+        self._selected = False
+        self._progress = 0.0
+
+    def _point(self, direction: str, dy: float, dp: float, t: float) -> List[GestureEvent]:
+        c = self.cfg
+        events: List[GestureEvent] = []
+        if self._selected:  # already selected: wait until the head returns to center
+            return events
+
+        if direction != self.current:
+            if direction != self._candidate:
+                self._candidate, self._candidate_since = direction, t
+                self._progress = 0.0
+            if t - self._candidate_since >= c.stable_s:
+                self.current = direction
+                self._anchor, self._still_since = (dy, dp), t
+                events.append(GestureEvent(event_type="move", target_id=direction, confidence=1.0))
+            return events
+
+        # Same highlighted direction: count stillness
+        if math.hypot(dy - self._anchor[0], dp - self._anchor[1]) > c.still_deg:
+            self._anchor, self._still_since = (dy, dp), t
+            self._progress = 0.0
+            return events
+        self._progress = min((t - self._still_since) / c.dwell_s, 1.0)
+        if self._progress >= 1.0:
+            events.append(GestureEvent(event_type="dwell", target_id=direction, confidence=1.0))
+            self._selected = True
+        return events
+
+    def _blink(self, frame: VisionFrame, t: float) -> List[GestureEvent]:
+        c = self.cfg
+        if frame.blink <= c.blink_threshold:
+            self._blink_since = None
+            return []
+        self._blink_since = self._blink_since if self._blink_since is not None else t
+        if t - self._blink_since >= c.blink_hold_s and t - self._last_back >= c.back_cooldown_s:
+            self._last_back = t
+            self._blink_since = None
+            return [GestureEvent(event_type="back", confidence=min(frame.blink, 1.0))]
+        return []

@@ -106,18 +106,20 @@ claude --model=gemma-4-26b-a4b
 
 ### Interaction
 
-Current implementation (head + long blink only):
+Current implementation ("point and hold", head + long blink only):
 
 | Gesture | Event | Action |
 |---|---|---|
-| Turn / tilt the head (left, right, up, down) | `move` with `target_id` = `left`/`right`/`up`/`down` | Move the highlight between options |
+| Move the head slightly left / right / up / down and keep it there (~0.35 s) | `move` with `target_id` = `left`/`right`/`up`/`down` | Highlight that option |
+| Keep the head still on it (~1.2 s) | `dwell` with the same `target_id` | Select it |
+| Return to the center | (re-arms) | Ready for the next choice |
 | Long blink (~0.6 s) | `back` | Go back / cancel |
 
-Short natural blinks are ignored. Each `move` fires once and the head must return near neutral before the next one (hysteresis + cooldown), so holding the head to one side does not spam events.
+Quick passes and jitter are ignored (direction must be stable before `move`, and the head can drift ~2.5° during the dwell). After a `dwell`, the head must return to the center before the next one. Short natural blinks are ignored.
 
-Original ideas not implemented yet: dwell to select, nod = yes, shake = no.
+Original ideas not implemented yet: nod = yes, shake = no.
 
-Planned: per-user calibration, smoothing (One Euro filter) and an adjustable dead zone and dwell time, because every user has a different range of movement.
+Planned: One Euro filter and per-user ranges, because every user has a different range of movement.
 
 ## Vision & gestures (how to run)
 
@@ -141,7 +143,7 @@ engine = GestureEngine()
 with HeadTracker() as tracker:
     while True:
         frame, vision_frame = tracker.read()      # vision_frame is None if no face is visible
-        for event in engine.update(vision_frame):  # GestureEvent("move", "left") / ("back")
+        for event in engine.update(vision_frame):  # GestureEvent("move"|"dwell", "left"...) / ("back")
             ...
 ```
 
@@ -149,8 +151,8 @@ How it works:
 
 - Head pose (yaw/pitch/roll in degrees) comes from the Face Landmarker facial transformation matrix; the blink score is the mean of the `eyeBlinkLeft`/`eyeBlinkRight` blendshapes.
 - The neutral pose is learned from the first ~1.5 s (keep still, looking at the screen). Gestures are measured relative to it.
-- Tunables are in `GestureConfig` (angle thresholds, blink threshold and duration, cooldowns, smoothing).
-- If left/right or up/down come out inverted on your camera, flip `yaw_sign` / `pitch_sign`.
+- Tunables are in `GestureConfig`: `yaw_deg`/`pitch_deg` (how far to move, lower = more sensitive), `stable_s` (time before highlighting), `dwell_s` (stillness to select), `still_deg`, blink threshold/duration, smoothing.
+- If directions come out inverted on your camera, flip `yaw_sign` / `pitch_sign` (defaults are already flipped for a typical webcam).
 - Timestamps passed to `detect_for_video` must always increase; `HeadTracker` guarantees it.
 
 Known to verify with real users: angle thresholds and the long-blink duration.
